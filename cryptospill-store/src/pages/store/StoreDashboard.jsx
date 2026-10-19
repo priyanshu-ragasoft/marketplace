@@ -6,6 +6,7 @@ import StoreChangePasswordCard from './StoreChangePasswordCard'
 import StoreAnnouncementsPage from './StoreAnnouncementsPage'
 import StoreBannersPage from './StoreBannersPage'
 import StoreProductsPage from './StoreProductsPage'
+import StoreBlogsPage from './StoreBlogsPage'
 import { useRouter } from '../../router/RouterContext'
 import {
   getStoreDetails,
@@ -23,7 +24,7 @@ import {
 
 export default function StoreDashboard({ onLogout }) {
   const { currentPath, navigate } = useRouter()
-  // Navigation tabs: 'dashboard' | 'products' | 'banners' | 'announcements' | 'profile' | 'password' | 'session'
+  // Navigation tabs: 'dashboard' | 'products' | 'banners' | 'announcements' | 'blogs' | 'profile' | 'password' | 'session'
   const [activeTab, setActiveTab] = useState(() => {
     if (currentPath === '/store/products' || currentPath.startsWith('/store/products')) {
       return 'products'
@@ -33,6 +34,9 @@ export default function StoreDashboard({ onLogout }) {
     }
     if (currentPath === '/store/banners' || currentPath.startsWith('/store/banners')) {
       return 'banners'
+    }
+    if (currentPath === '/store/blogs' || currentPath.startsWith('/store/blogs')) {
+      return 'blogs'
     }
     return 'dashboard'
   })
@@ -45,6 +49,8 @@ export default function StoreDashboard({ onLogout }) {
       setActiveTab('announcements')
     } else if (currentPath === '/store/banners' || currentPath.startsWith('/store/banners')) {
       setActiveTab('banners')
+    } else if (currentPath === '/store/blogs' || currentPath.startsWith('/store/blogs')) {
+      setActiveTab('blogs')
     }
   }, [currentPath])
 
@@ -57,10 +63,13 @@ export default function StoreDashboard({ onLogout }) {
       navigate('/store/announcements')
     } else if (tabId === 'banners') {
       navigate('/store/banners')
+    } else if (tabId === 'blogs') {
+      navigate('/store/blogs')
     } else if (
       currentPath.startsWith('/store/products') ||
       currentPath.startsWith('/store/announcements') ||
-      currentPath.startsWith('/store/banners')
+      currentPath.startsWith('/store/banners') ||
+      currentPath.startsWith('/store/blogs')
     ) {
       navigate('/admin')
     }
@@ -193,6 +202,15 @@ export default function StoreDashboard({ onLogout }) {
       icon: (
         <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+        </svg>
+      )
+    },
+    {
+      id: 'blogs',
+      label: 'Blog & Guides',
+      icon: (
+        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
         </svg>
       )
     },
@@ -444,11 +462,13 @@ export default function StoreDashboard({ onLogout }) {
                       ? 'Banners'
                       : activeTab === 'announcements'
                         ? 'Store Announcements'
-                        : activeTab === 'profile'
-                          ? 'Store Profile'
-                          : activeTab === 'password'
-                            ? 'Change Password'
-                            : 'Session & Security'}
+                        : activeTab === 'blogs'
+                          ? 'Store Blog & Guides'
+                          : activeTab === 'profile'
+                            ? 'Store Profile'
+                            : activeTab === 'password'
+                              ? 'Change Password'
+                              : 'Session & Security'}
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 font-normal mt-1">
                 {activeTab === 'products'
@@ -457,7 +477,9 @@ export default function StoreDashboard({ onLogout }) {
                     ? 'Manage homepage promo cards, pricing offers, and image assets.'
                     : activeTab === 'announcements'
                       ? 'Manage live promotion marquee & announcement offers on customer storefront.'
-                      : 'Overview of store administrator, real-time endpoints, and security sync.'}
+                      : activeTab === 'blogs'
+                        ? 'Publish educational guides, escrow reports, and updates directly to the storefront blog.'
+                        : 'Overview of store administrator, real-time endpoints, and security sync.'}
               </p>
             </div>
           </div>
@@ -563,6 +585,39 @@ export default function StoreDashboard({ onLogout }) {
                   <span>Manage Announcements</span>
                 </button>
               </div>
+
+              {/* Quick Blogs & Guides Card */}
+              <div className="bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-transparent border border-yellow-400/40 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm bg-white">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20 font-black">
+                    <svg className="w-6 h-6 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-black text-slate-900">Marketplace Blog &amp; Guides</h3>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-extrabold uppercase">
+                        Storefront Live
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1 max-w-xl">
+                      Publish and update educational articles, escrow explanations, buyer serial checks, and news that appear on the storefront blog page and footer.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleTabChange('blogs')}
+                  className="px-5 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-slate-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-[0.98]"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  <span>Manage Blogs</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -579,6 +634,11 @@ export default function StoreDashboard({ onLogout }) {
           {/* TAB 2: ANNOUNCEMENTS MANAGEMENT */}
           {activeTab === 'announcements' && (
             <StoreAnnouncementsPage onShowToast={showToast} />
+          )}
+
+          {/* TAB: BLOGS MANAGEMENT */}
+          {activeTab === 'blogs' && (
+            <StoreBlogsPage onShowToast={showToast} />
           )}
 
           {/* TAB 3: DETAILED PROFILE VIEW */}
@@ -661,47 +721,17 @@ export default function StoreDashboard({ onLogout }) {
                   <button
                     type="button"
                     onClick={() => {
-                      setStoreApiBaseUrl('http://localhost:5300')
-                      showToast('Gateway set to http://localhost:5300')
+                      setStoreApiBaseUrl(null)
+                      showToast('Gateway reset to .env default (Cloud API)')
                       window.location.reload()
                     }}
                     className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer ${
-                      activeBaseUrl.includes('localhost:5300')
+                      activeBaseUrl.includes('cryptospill.io') || activeBaseUrl.startsWith('/')
                         ? 'bg-blue-600 text-white border-blue-600'
                         : 'border-slate-200 text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    Local 5300
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStoreApiBaseUrl('http://192.168.0.226:5300')
-                      showToast('Gateway set to http://192.168.0.226:5300')
-                      window.location.reload()
-                    }}
-                    className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer ${
-                      activeBaseUrl.includes('192.168.0.226:5300')
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    LAN IP (192.168.0.226)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStoreApiBaseUrl('https://apis.cryptospill.io/api/v1')
-                      showToast('Gateway set to Cloud APIs')
-                      window.location.reload()
-                    }}
-                    className={`px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer ${
-                      activeBaseUrl.includes('cryptospill.io')
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    Cloud API
+                    Cloud API (.env)
                   </button>
                 </div>
               </div>

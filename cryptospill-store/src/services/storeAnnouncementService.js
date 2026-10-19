@@ -2,7 +2,7 @@ import {
   getStoreAccessToken,
   clearStoreAuth
 } from './storeStorage'
-import { getStoreApiBaseUrl, setStoreApiBaseUrl, parseApiError, fetchWithGatewayFallback } from './storeAuthService'
+import { getStoreApiBaseUrl, setStoreApiBaseUrl, parseApiError, fetchWithGatewayFallback, normalizeBaseUrl } from './storeAuthService'
 
 /**
  * Handle store session expiration or Invalid Store errors (401)
@@ -279,30 +279,23 @@ export async function deleteStoreAnnouncement(announcementId) {
 // PUBLIC WEBSITE BANNER ENDPOINT
 // =========================================================================
 
-/**
- * GET /store/announcement/websidelist
- * Public announcement list for customer website banner.
- * curl -X 'GET' 'http://localhost:5300/api/v1/store/announcement/websidelist' -H 'accept: *\/*'
- * Strictly NO Authorization header.
- * data is an array: [{ _id, message, linkUrl, sortOrder }]
- * If data is an empty array, hide the banner.
- */
+
+
 export async function getPublicActiveAnnouncements() {
   const baseUrl = getStoreApiBaseUrl()
   const candidateUrls = [
     `${baseUrl}/store/announcement/websidelist`
   ]
 
-  if (baseUrl.includes('localhost')) {
-    candidateUrls.push('http://192.168.0.226:5300/api/v1/store/announcement/websidelist')
-  } else if (baseUrl.includes('192.168.0.226')) {
-    candidateUrls.push('http://localhost:5300/api/v1/store/announcement/websidelist')
+  const envBase = normalizeBaseUrl()
+  if (baseUrl.startsWith('/') && `${envBase}/store/announcement/websidelist` !== candidateUrls[0]) {
+    candidateUrls.push(`${envBase}/store/announcement/websidelist`)
   }
 
   // Also include /announcements/active as fallback
   candidateUrls.push(`${baseUrl}/announcements/active`)
-  if (baseUrl.includes('localhost')) {
-    candidateUrls.push('http://192.168.0.226:5300/api/v1/announcements/active')
+  if (baseUrl.startsWith('/') && `${envBase}/announcements/active` !== candidateUrls[1]) {
+    candidateUrls.push(`${envBase}/announcements/active`)
   }
 
   for (const url of candidateUrls) {

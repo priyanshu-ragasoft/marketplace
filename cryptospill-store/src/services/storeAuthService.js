@@ -7,8 +7,9 @@ import {
 } from './storeStorage'
 
 export function normalizeBaseUrl(url) {
+  const envDefault = import.meta.env.VITE_STORE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'https://apis.cryptospill.io'
   if (!url) {
-    return 'http://192.168.0.226:5300/api/v1'
+    url = envDefault
   }
   let clean = url.trim().replace(/\/+$/, '')
   if (!clean.includes('/api/v1')) {
@@ -19,10 +20,20 @@ export function normalizeBaseUrl(url) {
 
 /**
  * When running on localhost (Vite dev server), use relative '/api/v1' path
- * so requests go through Vite's proxy (same-origin = zero CORS preflight).
- * Otherwise use the configured backend URL directly.
+ * so requests go through Vite's proxy (configured from .env, zero CORS preflight).
+ * Otherwise use the configured backend URL directly from .env.
  */
 export function getStoreApiBaseUrl() {
+  // Clear any stale local development override from localStorage
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('cryptospill_store_api_base')
+      if (stored && (stored.includes('localhost') || stored.includes('192.168.') || stored.includes('127.0.0.1'))) {
+        localStorage.removeItem('cryptospill_store_api_base')
+      }
+    } catch {}
+  }
+
   // Check if we're running on Vite dev server (localhost)
   const isLocalDev = typeof window !== 'undefined' &&
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
@@ -32,8 +43,7 @@ export function getStoreApiBaseUrl() {
   if (isLocalDev) {
     try {
       const override = localStorage.getItem('cryptospill_store_api_base')
-      // Only respect override if user explicitly set a non-localhost, non-proxy URL (e.g. cloud API)
-      if (override && override.trim() && !override.includes('localhost') && !override.includes('192.168.0.226')) {
+      if (override && override.trim() && override.startsWith('https://')) {
         return normalizeBaseUrl(override)
       }
     } catch {}
@@ -58,7 +68,7 @@ export function getStoreApiBaseUrl() {
     return normalizeBaseUrl(envGeneralBase)
   }
 
-  return 'http://192.168.0.226:5300/api/v1'
+  return 'https://apis.cryptospill.io/api/v1'
 }
 
 export function setStoreApiBaseUrl(url) {
@@ -74,7 +84,7 @@ export function setStoreApiBaseUrl(url) {
 /**
  * Fetch with seamless gateway fallback.
  * In local dev, requests go via Vite proxy (same-origin, no CORS).
- * In production, falls back between primary and alt URLs.
+ * In production, falls back to .env base URL.
  */
 export async function fetchWithGatewayFallback(endpoint, options = {}) {
   const primaryBase = getStoreApiBaseUrl()
@@ -85,10 +95,9 @@ export async function fetchWithGatewayFallback(endpoint, options = {}) {
     return fetch(primaryUrl, options)
   }
 
-  // Non-proxy mode: try primary with timeout, fallback to alt
-  const altBase = primaryBase.includes('192.168.0.226')
-    ? 'http://localhost:5300/api/v1'
-    : (primaryBase.includes('localhost') ? 'http://192.168.0.226:5300/api/v1' : null)
+  // Non-proxy mode: try primary with timeout, fallback to .env base
+  const envBase = normalizeBaseUrl(import.meta.env.VITE_STORE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'https://apis.cryptospill.io')
+  const altBase = primaryBase !== envBase ? envBase : null
 
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), 3500)
@@ -253,18 +262,20 @@ export async function loginStore({ email, password }) {
   if (!response.ok && response.status === 404) {
     const candidateUrls = []
     
-    // Fallback 1: without /api/v1 if it had it (e.g. http://localhost:5300/store/auth/login)
+    // Fallback 1: without /api/v1 if it had it
     if (currentBase.includes('/api/v1')) {
       const stripped = currentBase.replace(/\/api\/v1\/?$/, '')
       candidateUrls.push(`${stripped}/store/auth/login`)
     } else {
-      // Fallback 1b: with /api/v1 if it didn't have it (e.g. http://localhost:5300/api/v1/store/auth/login)
+      // Fallback 1b: with /api/v1 if it didn't have it
       candidateUrls.push(`${currentBase}/api/v1/store/auth/login`)
     }
     
-    // Fallback 2: official cloud endpoint
-    if (!currentBase.includes('cryptospill.io')) {
-      candidateUrls.push('https://apis.cryptospill.io/api/v1/store/auth/login')
+    // Fallback 2: official cloud endpoint from .env
+    const cloudBase = normalizeBaseUrl(import.meta.env.VITE_STORE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'https://apis.cryptospill.io')
+    const cloudLoginUrl = `${cloudBase}/store/auth/login`
+    if (!candidateUrls.includes(cloudLoginUrl)) {
+      candidateUrls.push(cloudLoginUrl)
     }
 
     for (const altUrl of candidateUrls) {

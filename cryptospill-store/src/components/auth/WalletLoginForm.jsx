@@ -89,7 +89,7 @@ export default function WalletLoginForm({ onLoginSuccess }) {
     const rawApi = import.meta.env.VITE_WALLET_LOGIN_API
     const rawBase = import.meta.env.VITE_API_BASE_URL
     const apiEndpoint = rawApi?.trim() || 
-      `${(rawBase ? rawBase.trim().replace(/\/+$/, '') : 'http://localhost:5300')}/api/v1/user/auth/userwalletlogin`
+      `${(rawBase ? rawBase.trim().replace(/\/+$/, '') : 'https://apis.cryptospill.io')}/api/v1/user/auth/userwalletlogin`
 
     setIsLoading(true)
 

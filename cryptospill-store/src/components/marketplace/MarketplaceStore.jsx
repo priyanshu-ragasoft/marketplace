@@ -20,6 +20,7 @@ import PrivacyPolicyPage from '../../pages/PrivacyPolicyPage'
 import TermsPage from '../../pages/TermsPage'
 import MyOrdersPage from '../../pages/MyOrdersPage'
 import EscrowStatusPage from '../../pages/EscrowStatusPage'
+import BlogPage from '../../pages/BlogPage'
 
 import LoginModal from '../auth/LoginModal'
 import { useRouter } from '../../router/RouterContext'
@@ -177,6 +178,8 @@ export default function MarketplaceStore({
           <MyOrdersPage />
         ) : currentPath === '/account/escrow' || currentPath === '/escrow' ? (
           <EscrowStatusPage />
+        ) : currentPath === '/blog' || currentPath.startsWith('/blog/') ? (
+          <BlogPage />
         ) : (
           <HomePage
             searchQuery={searchQuery}

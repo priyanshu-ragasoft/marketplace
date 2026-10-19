@@ -2,7 +2,7 @@ import {
   getStoreAccessToken,
   clearStoreAuth
 } from './storeStorage'
-import { getStoreApiBaseUrl, setStoreApiBaseUrl, parseApiError, fetchWithGatewayFallback } from './storeAuthService'
+import { getStoreApiBaseUrl, setStoreApiBaseUrl, parseApiError, fetchWithGatewayFallback, normalizeBaseUrl } from './storeAuthService'
 
 /**
  * Handle store session expiration (401)
@@ -104,10 +104,9 @@ export async function uploadBannerImage(file) {
   const baseUrl = getStoreApiBaseUrl()
 
   const candidateBases = [baseUrl]
-  if (baseUrl.includes('localhost')) {
-    candidateBases.push('http://192.168.0.226:5300/api/v1')
-  } else if (baseUrl.includes('192.168.0.226')) {
-    candidateBases.push('http://localhost:5300/api/v1')
+  const envBase = normalizeBaseUrl()
+  if (baseUrl.startsWith('/') && !candidateBases.includes(envBase)) {
+    candidateBases.push(envBase)
   }
 
   const candidatePaths = ['/upload/image', '/upload']
@@ -361,10 +360,9 @@ export async function getPublicWebsiteBanners() {
     `${baseUrl}/store/banner/websidelist`
   ]
 
-  if (baseUrl.includes('localhost')) {
-    candidateUrls.push('http://192.168.0.226:5300/api/v1/store/banner/websidelist')
-  } else if (baseUrl.includes('192.168.0.226')) {
-    candidateUrls.push('http://localhost:5300/api/v1/store/banner/websidelist')
+  const envBase = normalizeBaseUrl()
+  if (baseUrl.startsWith('/') && `${envBase}/store/banner/websidelist` !== candidateUrls[0]) {
+    candidateUrls.push(`${envBase}/store/banner/websidelist`)
   }
 
   for (const url of candidateUrls) {
