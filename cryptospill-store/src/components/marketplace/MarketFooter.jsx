@@ -126,16 +126,8 @@ export default function MarketFooter() {
             {/* Direct Contact Reassurance */}
             <div className="text-xs text-slate-600 space-y-1.5 pt-1">
               <p>
-                <span className="font-bold text-slate-900">Shopper Support:</span>{' '}
+                <span className="font-bold text-slate-900">Community Store Support:</span>{' '}
                 <a href="mailto:support@cryptospill.store" className="hover:text-amber-600 transition">support@cryptospill.store</a>
-              </p>
-              <p>
-                <span className="font-bold text-slate-900">Escrow Desk:</span>{' '}
-                <span className="text-slate-500">escrow@cryptospill.store</span>
-              </p>
-              <p>
-                <span className="font-bold text-slate-900">Hours:</span>{' '}
-                <span className="text-slate-500">Mon &ndash; Sat, 9:00 AM &ndash; 8:00 PM EST</span>
               </p>
             </div>
 
