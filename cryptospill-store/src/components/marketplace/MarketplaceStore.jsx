@@ -19,18 +19,21 @@ import EscrowRulesPage from '../../pages/EscrowRulesPage'
 import PrivacyPolicyPage from '../../pages/PrivacyPolicyPage'
 import TermsPage from '../../pages/TermsPage'
 import MyOrdersPage from '../../pages/MyOrdersPage'
+import OrderSlipPage from '../../pages/OrderSlipPage'
 import EscrowStatusPage from '../../pages/EscrowStatusPage'
 import BlogPage from '../../pages/BlogPage'
 
 import LoginModal from '../auth/LoginModal'
 import { useRouter } from '../../router/RouterContext'
+import { addStoreCartItem, clearStoreCart, fetchStoreCart, removeStoreCartItem, updateStoreCartItem } from '../../services/storeCartService'
 
 export default function MarketplaceStore({ 
   isLoggedIn, 
   currentUser, 
   onLoginSuccess,
   onOpenLogin, 
-  onLogout 
+  onLogout,
+  onRewardPointsUpdated
 }) {
   const { currentPath, navigate } = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
@@ -39,41 +42,30 @@ export default function MarketplaceStore({
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [loginPromptMessage, setLoginPromptMessage] = useState('')
   const [pendingProductToAdd, setPendingProductToAdd] = useState(null)
-
-  // Initial cart starts empty (0 items)
   const [cartItems, setCartItems] = useState([])
 
-  // Automatically clear cart when user logs out
   useEffect(() => {
     if (!isLoggedIn) {
       setCartItems([])
       setIsCartOpen(false)
+      return undefined
+    }
+    let cancelled = false
+    fetchStoreCart()
+      .then((items) => {
+        if (!cancelled) setCartItems(items)
+      })
+      .catch(() => {
+        if (!cancelled) setCartItems([])
+      })
+    return () => {
+      cancelled = true
     }
   }, [isLoggedIn])
 
-  // Cart Item Adder Helper
-  const addItemToCart = (product) => {
-    const prodId = product._id || product.id
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === prodId)
-      if (existing) {
-        return prev.map((item) =>
-          item.id === prodId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      }
-      return [
-        ...prev,
-        {
-          id: prodId,
-          title: product.title,
-          priceUSD: product.priceUSD,
-          quantity: 1,
-          image: product.image
-        }
-      ]
-    })
+  const addItemToCart = async (product) => {
+    const items = await addStoreCartItem(product)
+    setCartItems(items)
   }
 
   // Cart Handlers with Login Protection
@@ -85,7 +77,7 @@ export default function MarketplaceStore({
       return false
     }
 
-    addItemToCart(product)
+    addItemToCart(product).catch(() => {})
     return true
   }
 
@@ -94,23 +86,21 @@ export default function MarketplaceStore({
       handleRemoveItem(id)
       return
     }
-    setCartItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: newQty } : item))
-    )
+    updateStoreCartItem(id, newQty).then(setCartItems).catch(() => {})
   }
 
   const handleRemoveItem = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id))
+    removeStoreCartItem(id).then(setCartItems).catch(() => {})
   }
 
   const handleClearCart = () => {
-    setCartItems([])
+    clearStoreCart().then(setCartItems).catch(() => {})
   }
 
   const totalCartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0)
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col justify-between selection:bg-yellow-400 selection:text-black font-['Plus_Jakarta_Sans',sans-serif]">
+    <div className={`${currentPath.startsWith('/order/') ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-[#f8fafc] text-slate-900 flex flex-col justify-between selection:bg-yellow-400 selection:text-black font-['Plus_Jakarta_Sans',sans-serif]`}>
       {/* Marketplace Navigation Bar */}
       <MarketNavbar
         searchQuery={searchQuery}
@@ -174,6 +164,12 @@ export default function MarketplaceStore({
           <PrivacyPolicyPage />
         ) : currentPath === '/legal/terms' ? (
           <TermsPage />
+        ) : currentPath.startsWith('/order/') ? (
+          <OrderSlipPage
+            orderId={decodeURIComponent(currentPath.slice('/order/'.length).split('/')[0])}
+            onRewardPointsUpdated={onRewardPointsUpdated}
+            onCartCleared={handleClearCart}
+          />
         ) : currentPath === '/account/orders' || currentPath === '/orders' ? (
           <MyOrdersPage />
         ) : currentPath === '/account/escrow' || currentPath === '/escrow' ? (
@@ -200,6 +196,7 @@ export default function MarketplaceStore({
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
         onClearCart={handleClearCart}
+        onRewardPointsUpdated={onRewardPointsUpdated}
       />
 
       {/* CouponDunia-Style 2-Column Login Popup Modal */}
@@ -222,8 +219,7 @@ export default function MarketplaceStore({
         }}
       />
 
-      {/* Comprehensive Human Store Directory Footer */}
-      <MarketFooter />
+      {!currentPath.startsWith('/order/') && <MarketFooter />}
     </div>
   )
 }

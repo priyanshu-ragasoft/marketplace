@@ -105,22 +105,8 @@ export default function MarketFooter() {
             </div>
 
             <form onSubmit={handleSubscribe} className="flex items-center gap-2 w-full md:w-auto max-w-md">
-              <div className="relative flex-1">
-                <input
-                  type="email"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  placeholder="Enter your email address..."
-                  required
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 shadow-2xs"
-                />
-              </div>
-              <button
-                type="submit"
-                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-yellow-400 hover:text-black text-white font-bold text-xs transition-all shadow-xs cursor-pointer shrink-0"
-              >
-                {isSubscribed ? 'Subscribed!' : 'Join Drops'}
-              </button>
+             
+              
             </form>
           </div>
         </div>

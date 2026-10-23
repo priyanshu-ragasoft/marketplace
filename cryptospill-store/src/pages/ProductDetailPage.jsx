@@ -282,11 +282,6 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
                     <span className="text-3xl sm:text-4xl font-black text-slate-950">
                       ${Number(product.priceUSD || 0).toFixed(2)}
                     </span>
-                    {product.priceCrypto && (
-                      <span className="text-base sm:text-lg font-black text-amber-700">
-                        {product.priceCrypto}
-                      </span>
-                    )}
                   </div>
                 </div>
 
@@ -534,9 +529,6 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
                       </h4>
                       <div className="flex items-baseline justify-between mt-3 pt-2 border-t border-slate-100">
                         <span className="text-sm font-black text-slate-900">${Number(rel.priceUSD || 0).toFixed(2)}</span>
-                        {rel.priceCrypto && (
-                          <span className="text-xs font-bold text-amber-700">{rel.priceCrypto}</span>
-                        )}
                       </div>
                     </div>
                   </div>

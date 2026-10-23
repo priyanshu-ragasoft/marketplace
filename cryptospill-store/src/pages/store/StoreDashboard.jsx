@@ -7,6 +7,7 @@ import StoreAnnouncementsPage from './StoreAnnouncementsPage'
 import StoreBannersPage from './StoreBannersPage'
 import StoreProductsPage from './StoreProductsPage'
 import StoreBlogsPage from './StoreBlogsPage'
+import StoreDeliveriesPage from './StoreDeliveriesPage'
 import { useRouter } from '../../router/RouterContext'
 import {
   getStoreDetails,
@@ -38,6 +39,9 @@ export default function StoreDashboard({ onLogout }) {
     if (currentPath === '/store/blogs' || currentPath.startsWith('/store/blogs')) {
       return 'blogs'
     }
+    if (currentPath === '/store/deliveries' || currentPath.startsWith('/store/deliveries')) {
+      return 'deliveries'
+    }
     return 'dashboard'
   })
 
@@ -51,6 +55,8 @@ export default function StoreDashboard({ onLogout }) {
       setActiveTab('banners')
     } else if (currentPath === '/store/blogs' || currentPath.startsWith('/store/blogs')) {
       setActiveTab('blogs')
+    } else if (currentPath === '/store/deliveries' || currentPath.startsWith('/store/deliveries')) {
+      setActiveTab('deliveries')
     }
   }, [currentPath])
 
@@ -65,11 +71,14 @@ export default function StoreDashboard({ onLogout }) {
       navigate('/store/banners')
     } else if (tabId === 'blogs') {
       navigate('/store/blogs')
+    } else if (tabId === 'deliveries') {
+      navigate('/store/deliveries')
     } else if (
       currentPath.startsWith('/store/products') ||
       currentPath.startsWith('/store/announcements') ||
       currentPath.startsWith('/store/banners') ||
-      currentPath.startsWith('/store/blogs')
+      currentPath.startsWith('/store/blogs') ||
+      currentPath.startsWith('/store/deliveries')
     ) {
       navigate('/admin')
     }
@@ -202,6 +211,15 @@ export default function StoreDashboard({ onLogout }) {
       icon: (
         <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+        </svg>
+      )
+    },
+    {
+      id: 'deliveries',
+      label: 'Orders',
+      icon: (
+        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7h13l5 5v7a1 1 0 01-1 1h-4a2 2 0 11-4 0H9a2 2 0 11-4 0H3a1 1 0 01-1-1V8a1 1 0 011-1z" />
         </svg>
       )
     },
@@ -464,6 +482,8 @@ export default function StoreDashboard({ onLogout }) {
                         ? 'Store Announcements'
                         : activeTab === 'blogs'
                           ? 'Store Blog & Guides'
+                          : activeTab === 'deliveries'
+                            ? 'Orders'
                           : activeTab === 'profile'
                             ? 'Store Profile'
                             : activeTab === 'password'
@@ -479,6 +499,8 @@ export default function StoreDashboard({ onLogout }) {
                       ? 'Manage live promotion marquee & announcement offers on customer storefront.'
                       : activeTab === 'blogs'
                         ? 'Publish educational guides, escrow reports, and updates directly to the storefront blog.'
+                        : activeTab === 'deliveries'
+                          ? 'Order numbers, payment, and delivery status from checkout through delivery.'
                         : 'Overview of store administrator, real-time endpoints, and security sync.'}
               </p>
             </div>
@@ -639,6 +661,10 @@ export default function StoreDashboard({ onLogout }) {
           {/* TAB: BLOGS MANAGEMENT */}
           {activeTab === 'blogs' && (
             <StoreBlogsPage onShowToast={showToast} />
+          )}
+
+          {activeTab === 'deliveries' && (
+            <StoreDeliveriesPage />
           )}
 
           {/* TAB 3: DETAILED PROFILE VIEW */}

@@ -90,7 +90,6 @@ export default function StoreProductsPage({ onShowToast }) {
   const [formTitle, setFormTitle] = useState('')
   const [formCategoryId, setFormCategoryId] = useState('') // category _id
   const [formPriceUSD, setFormPriceUSD] = useState('')
-  const [formPriceCrypto, setFormPriceCrypto] = useState('')
   const [formImage, setFormImage] = useState('')
   const [formMerchant, setFormMerchant] = useState('Apple Authorized Escrow Store')
   const [formBadge, setFormBadge] = useState('NEW ARRIVAL')
@@ -189,16 +188,6 @@ export default function StoreProductsPage({ onShowToast }) {
     fetchProducts()
   }, [fetchProducts])
 
-  // Auto-calculate crypto price in ETH whenever USD price changes
-  const handleUSDPriceChange = (val) => {
-    setFormPriceUSD(val)
-    const num = parseFloat(val)
-    if (!isNaN(num) && num > 0) {
-      const eth = (num / 3480).toFixed(3)
-      setFormPriceCrypto(`${eth} ETH`)
-    }
-  }
-
   // Open Create Modal
   const handleOpenCreateModal = () => {
     setModalMode('create')
@@ -206,7 +195,6 @@ export default function StoreProductsPage({ onShowToast }) {
     setFormTitle('')
     setFormCategoryId(categories[0]?._id || '')
     setFormPriceUSD('1299.00')
-    setFormPriceCrypto('0.373 ETH')
     setFormImage(appleIPhone18ProImg)
     setFormMerchant('Apple Authorized Escrow Store')
     setFormBadge('NEW ARRIVAL')
@@ -234,7 +222,6 @@ export default function StoreProductsPage({ onShowToast }) {
     // In edit modal, set the category select to category_id, not the slug
     setFormCategoryId(product.category_id || product.categoryInfo?._id || product.category || categories[0]?._id || '')
     setFormPriceUSD(product.priceUSD != null ? String(product.priceUSD) : '')
-    setFormPriceCrypto(product.priceCrypto || '')
     setFormImage(product.image || '')
     setFormMerchant(product.merchant || 'Apple Authorized Escrow Store')
     setFormBadge(product.badge || 'BEST SELLER')
@@ -352,14 +339,11 @@ export default function StoreProductsPage({ onShowToast }) {
         .map((s) => s.trim())
         .filter(Boolean)
 
-      const cryptoCalculated =
-        formPriceCrypto.trim() || `${(priceNum / 3480).toFixed(3)} ETH`
-
       const payload = {
         title: formTitle.trim(),
         category: formCategoryId, // category _id
         priceUSD: priceNum,
-        priceCrypto: cryptoCalculated,
+        priceCrypto: '',
         image: formImage || appleIPhone18ProImg,
         merchant: formMerchant.trim() || 'Apple Authorized Escrow Store',
         badge: formBadge.trim().toUpperCase(),
@@ -706,7 +690,7 @@ export default function StoreProductsPage({ onShowToast }) {
                 <tr>
                   <th className="py-3.5 px-4">Item</th>
                   <th className="py-3.5 px-4">Category</th>
-                  <th className="py-3.5 px-4">Price (USD / ETH)</th>
+                  <th className="py-3.5 px-4">Price</th>
                   <th className="py-3.5 px-4">Rating & Badge</th>
                   <th className="py-3.5 px-4">Stock Status</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
@@ -753,9 +737,6 @@ export default function StoreProductsPage({ onShowToast }) {
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <div className="font-black text-slate-900 text-sm">
                           ${Number(prod.priceUSD || 0).toFixed(2)}
-                        </div>
-                        <div className="text-[11px] font-black text-amber-600">
-                          {prod.priceCrypto || '0.350 ETH'}
                         </div>
                       </td>
 
@@ -887,9 +868,6 @@ export default function StoreProductsPage({ onShowToast }) {
                     <div>
                       <span className="text-sm font-black text-slate-950 block">
                         ${Number(prod.priceUSD || 0).toFixed(2)}
-                      </span>
-                      <span className="text-[10px] font-black text-amber-600">
-                        {prod.priceCrypto}
                       </span>
                     </div>
 
@@ -1032,9 +1010,6 @@ export default function StoreProductsPage({ onShowToast }) {
                             <div>
                               <p className="text-base font-black text-slate-950 leading-none">
                                 ${formPriceUSD ? parseFloat(formPriceUSD).toFixed(2) : '1,299.00'}
-                              </p>
-                              <p className="text-[11px] font-black text-amber-600 mt-1">
-                                {formPriceCrypto || '0.373 ETH'}
                               </p>
                             </div>
                             <span className="px-3 py-1.5 rounded-lg bg-yellow-400 text-slate-950 font-bold text-[10px] uppercase shadow-2xs">
@@ -1182,34 +1157,19 @@ export default function StoreProductsPage({ onShowToast }) {
                         <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Pricing & Escrow Rates</h4>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                            USD Price ($) <span className="text-rose-500">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formPriceUSD}
-                            onChange={(e) => handleUSDPriceChange(e.target.value)}
-                            placeholder="1299.00"
-                            required
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-black text-slate-900 focus:outline-none focus:border-yellow-400"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                            Crypto Price (ETH / BTC)
-                          </label>
-                          <input
-                            type="text"
-                            value={formPriceCrypto}
-                            onChange={(e) => setFormPriceCrypto(e.target.value)}
-                            placeholder="0.373 ETH"
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-black text-amber-600 focus:outline-none focus:border-yellow-400"
-                          />
-                        </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                          USD Price ($) <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={formPriceUSD}
+                          onChange={(e) => setFormPriceUSD(e.target.value)}
+                          placeholder="1299.00"
+                          required
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-black text-slate-900 focus:outline-none focus:border-yellow-400"
+                        />
                       </div>
 
                       <label className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">

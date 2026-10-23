@@ -586,7 +586,6 @@ export default function AdminDashboard({ adminUser, onAdminLogout }) {
                     <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                       <div>
                         <p className="text-sm font-black text-slate-950 font-mono">${p.priceUSD.toFixed(2)}</p>
-                        <p className="text-[10px] text-slate-400 font-mono">{p.priceCrypto}</p>
                       </div>
 
                       <div className="flex items-center gap-1.5">

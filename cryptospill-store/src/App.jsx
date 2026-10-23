@@ -83,12 +83,23 @@ function MainContent() {
     navigate('/')
   }
 
+  const handleRewardPointsUpdated = (pointsAvailable) => {
+    setCurrentUser((prev) => {
+      if (!prev) return prev
+      const next = { ...prev, reward_points: pointsAvailable }
+      localStorage.setItem('currentUser', JSON.stringify(next))
+      return next
+    })
+  }
+
   const handleCustomerLogout = () => {
     setIsLoggedIn(false)
     setCurrentUser(null)
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('currentUser')
+    localStorage.removeItem('cryptospill_market_cart')
+    sessionStorage.removeItem('cryptospill_market_cart')
     navigate('/')
   }
 
@@ -162,6 +173,7 @@ function MainContent() {
       onLoginSuccess={handleCustomerLoginSuccess}
       onOpenLogin={handleOpenLogin}
       onLogout={handleCustomerLogout}
+      onRewardPointsUpdated={handleRewardPointsUpdated}
     />
   )
 }

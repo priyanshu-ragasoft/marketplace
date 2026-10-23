@@ -91,9 +91,6 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
                     <span className="text-2xl sm:text-3xl font-black text-slate-950">
                       ${product.priceUSD.toFixed(2)}
                     </span>
-                    <span className="ml-2 text-sm font-bold text-amber-500">
-                      ≈ {product.priceCrypto}
-                    </span>
                   </div>
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md">
                     Escrow Ready

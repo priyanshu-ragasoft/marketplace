@@ -90,11 +90,6 @@ export default function MarketNavbar({
     return name.slice(0, 2).toUpperCase() || 'CS'
   })()
 
-  // Balance from API if available
-  const walletBalance = currentUser?.balance !== undefined
-    ? `${currentUser.balance} ETH`
-    : (currentUser?.wallet_balance || currentUser?.eth_balance || null)
-
   // Reward Points from API (reward_points in response, e.g. 3001)
   const rawRewards = currentUser?.reward_points !== undefined
     ? currentUser.reward_points
@@ -393,19 +388,7 @@ export default function MarketNavbar({
                       </svg>
                       <span>Escrow Multi-Sig Status</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsProfileOpen(false)
-                        navigate('/admin')
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-amber-700 hover:bg-amber-50 hover:text-amber-900 transition font-bold group text-left cursor-pointer"
-                    >
-                      <svg className="w-4 h-4 text-amber-500 group-hover:text-amber-700 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                      <span>Admin Governance Console</span>
-                    </button>
+                  
                   </div>
 
                   {/* Log Out Bar */}

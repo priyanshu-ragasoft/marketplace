@@ -111,11 +111,6 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
             <p className="text-lg font-black text-slate-950 leading-none">
               ${Number(product.priceUSD || 0).toFixed(2)}
             </p>
-            {product.priceCrypto ? (
-              <p className="text-xs font-black mt-1" style={{ color: '#d97706' }}>
-                {product.priceCrypto}
-              </p>
-            ) : null}
           </div>
 
           {/* If inStock is false, show out-of-stock state and do not offer add-to-escrow */}

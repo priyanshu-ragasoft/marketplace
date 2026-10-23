@@ -13,10 +13,16 @@ export default function BrandLogo({ size = 'default', isDarkBackground = false }
       : 'w-8 h-8 sm:w-10 sm:h-10'
 
   const textSize = isLarge
-    ? 'text-xl sm:text-3xl'
+    ? 'text-xl sm:text-2xl'
     : isSmall
-      ? 'text-sm sm:text-lg'
-      : 'text-lg sm:text-2xl'
+      ? 'text-sm sm:text-base'
+      : 'text-[17px] sm:text-[20px]'
+
+  const storeTextSize = isLarge
+    ? 'text-[18px] sm:text-[22px]'
+    : isSmall
+      ? 'text-[10px] sm:text-[12px]'
+      : 'text-[12px] sm:text-[14px]'
 
   return (
     <Link to="/" className="inline-flex items-center gap-2 sm:gap-2.5 select-none group cursor-pointer no-underline">
@@ -28,22 +34,13 @@ export default function BrandLogo({ size = 'default', isDarkBackground = false }
         />
       </div>
 
-      <div className="flex items-center tracking-tight">
-        <span className="flex min-w-0 items-baseline gap-0 select-none">
-          <span className={`font-sans text-[18px] font-extrabold leading-none tracking-tight sm:text-[22px] lg:text-[26px] ${isDarkBackground ? 'text-white' : 'text-black'}`}>
-            Crypto
-          </span>
-          <span 
-            className="font-sans text-[18px] font-extrabold leading-none tracking-tight sm:text-[22px] lg:text-[26px]"
-            style={{ color: '#D1A61B' }}
-          >
-            Spill
-          </span>
+      <div className="flex flex-col justify-center select-none leading-none font-sans">
+        <span className={`font-sans font-extrabold leading-tight tracking-tight ${textSize} ${isDarkBackground ? 'text-white' : 'text-black'}`}>
+          Community
         </span>
-        <span className={`ml-1.5 sm:ml-2 text-[8.5px] sm:text-[10px] font-extrabold uppercase tracking-widest px-1.5 sm:px-2 py-0.5 rounded-full ${isDarkBackground
-            ? 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/30'
-            : 'bg-yellow-100 text-amber-800 border border-yellow-300'
-          }`}>
+        <span
+          className={`font-sans font-extrabold leading-none uppercase mt-1 ${storeTextSize} text-[#D1A61B] w-fit`}
+        >
           STORE
         </span>
       </div>
