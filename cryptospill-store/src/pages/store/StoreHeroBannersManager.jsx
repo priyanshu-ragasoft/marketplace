@@ -284,17 +284,7 @@ export default function StoreHeroBannersManager({ onShowToast }) {
                   </p>
                 </div>
 
-                {/* 5. Bottom Row: Cashback Pill */}
-                <div className="relative z-10 flex items-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-white text-xs font-bold shadow-sm">
-                    <span className="px-1.5 py-0.5 rounded-[4px] bg-yellow-400 text-black font-black text-[10px] leading-none shrink-0">
-                      {banner.cashbackTag || 'CS'}
-                    </span>
-                    <span className="truncate max-w-[130px] sm:max-w-[150px]">{banner.cashbackText}</span>
-                  </div>
-                </div>
-
-                {/* 6. Right Side: Product Showcase Image with seamless gradient mask */}
+                {/* 5. Right Side: Product Showcase Image with seamless gradient mask */}
                 <div
                   className="absolute right-0 top-0 bottom-0 w-[50%] sm:w-[54%] z-10 flex items-end justify-end pointer-events-none overflow-hidden rounded-r-[28px]"
                   style={{
@@ -317,16 +307,33 @@ export default function StoreHeroBannersManager({ onShowToast }) {
                   />
                 </div>
 
-                {/* 7. Bottom-right Glowing Yellow Badge */}
-                <div className="absolute right-3 bottom-3 z-20 pointer-events-none">
-                  <div className="px-3.5 py-2 rounded-2xl bg-gradient-to-b from-[#FFD200] via-[#FFBA00] to-[#FFA000] text-slate-950 shadow-[0_8px_20px_rgba(245,158,11,0.45)] border border-yellow-200/60 flex flex-col items-center justify-center text-center leading-tight">
-                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-950 block">
-                      {banner.badgeText}
-                    </span>
-                    <span className="text-[9px] sm:text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-950 text-[#FFD200] mt-1 tracking-wide shadow-inner block">
-                      {banner.badgeSub || 'LIVE NOW'}
-                    </span>
-                  </div>
+                {/* 6. Bottom Row: Left CS Cashback Chip + Right Campaign Badge (Side-by-side, Zero Overlap) */}
+                <div className="relative z-20 flex items-end justify-between gap-2 mt-auto pt-2">
+                  {banner.cashbackText ? (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-white text-[11px] sm:text-xs font-bold shadow-sm min-w-0 max-w-[56%] shrink">
+                      <span className="px-1.5 py-0.5 rounded-[4px] bg-yellow-400 text-black font-black text-[9px] sm:text-[10px] leading-none shrink-0">
+                        {banner.cashbackTag || 'CS'}
+                      </span>
+                      <span className="truncate">{banner.cashbackText}</span>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
+
+                  {(banner.badgeText || banner.badgeSub) && (
+                    <div className="shrink-0 pointer-events-none">
+                      <div className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-2xl bg-gradient-to-b from-[#FFD200] via-[#FFBA00] to-[#FFA000] text-slate-950 shadow-[0_4px_14px_rgba(245,158,11,0.4)] border border-yellow-200/60 flex flex-col items-center justify-center text-center leading-tight">
+                        {banner.badgeText && (
+                          <span className="text-[8.5px] sm:text-[9.5px] font-black uppercase tracking-wider text-slate-950 block whitespace-nowrap">
+                            {banner.badgeText}
+                          </span>
+                        )}
+                        <span className="text-[8px] sm:text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-950 text-[#FFD200] mt-0.5 tracking-wide shadow-inner block whitespace-nowrap">
+                          {banner.badgeSub || 'LIVE NOW'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -590,15 +597,6 @@ export default function StoreHeroBannersManager({ onShowToast }) {
                     </p>
                   </div>
 
-                  <div className="relative z-10 flex items-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-white text-xs font-bold shadow-sm">
-                      <span className="px-1.5 py-0.5 rounded-[4px] bg-yellow-400 text-black font-black text-[10px] leading-none shrink-0">
-                        {newBanner.cashbackTag || 'CS'}
-                      </span>
-                      <span className="truncate max-w-[130px] sm:max-w-[150px]">{newBanner.cashbackText || 'Upto 8% Crypto Cashback'}</span>
-                    </div>
-                  </div>
-
                   <div
                     className="absolute right-0 top-0 bottom-0 w-[50%] sm:w-[54%] z-10 flex items-end justify-end pointer-events-none overflow-hidden rounded-r-[28px]"
                     style={{
@@ -613,14 +611,24 @@ export default function StoreHeroBannersManager({ onShowToast }) {
                     />
                   </div>
 
-                  <div className="absolute right-3 bottom-3 z-20 pointer-events-none">
-                    <div className="px-3.5 py-2 rounded-2xl bg-gradient-to-b from-[#FFD200] via-[#FFBA00] to-[#FFA000] text-slate-950 shadow-[0_8px_20px_rgba(245,158,11,0.45)] border border-yellow-200/60 flex flex-col items-center justify-center text-center leading-tight">
-                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-950 block">
-                        {newBanner.badgeText || 'THE BIG SPILL DAYS'}
+                  {/* Bottom Row: CS Cashback Chip + Campaign Badge (Zero Overlap) */}
+                  <div className="relative z-20 flex items-end justify-between gap-2 mt-auto pt-2">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-white text-[11px] sm:text-xs font-bold shadow-sm min-w-0 max-w-[56%] shrink">
+                      <span className="px-1.5 py-0.5 rounded-[4px] bg-yellow-400 text-black font-black text-[9px] sm:text-[10px] leading-none shrink-0">
+                        {newBanner.cashbackTag || 'CS'}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-950 text-[#FFD200] mt-1 tracking-wide shadow-inner block">
-                        {newBanner.badgeSub || 'LIVE NOW'}
-                      </span>
+                      <span className="truncate">{newBanner.cashbackText || 'Upto 8% Crypto Cashback'}</span>
+                    </div>
+
+                    <div className="shrink-0 pointer-events-none">
+                      <div className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-2xl bg-gradient-to-b from-[#FFD200] via-[#FFBA00] to-[#FFA000] text-slate-950 shadow-[0_4px_14px_rgba(245,158,11,0.4)] border border-yellow-200/60 flex flex-col items-center justify-center text-center leading-tight">
+                        <span className="text-[8.5px] sm:text-[9.5px] font-black uppercase tracking-wider text-slate-950 block whitespace-nowrap">
+                          {newBanner.badgeText || 'THE BIG SPILL DAYS'}
+                        </span>
+                        <span className="text-[8px] sm:text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-950 text-[#FFD200] mt-0.5 tracking-wide shadow-inner block whitespace-nowrap">
+                          {newBanner.badgeSub || 'LIVE NOW'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -854,21 +854,7 @@ export default function StoreBannersPage({ onShowToast }) {
                             </p>
                           </div>
 
-                          {/* 5. Bottom-Left chip: CS yellow squircle + rewardText */}
-                          <div className="relative z-10 flex items-center">
-                            {(formRewardText || 'Upto 8% Crypto Cashback') && (
-                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-white text-[11px] font-bold shadow-sm">
-                                <span className="px-1.5 py-0.5 rounded-[4px] bg-yellow-400 text-black font-black text-[9px] leading-none shrink-0">
-                                  CS
-                                </span>
-                                <span className="truncate max-w-[120px]">
-                                  {formRewardText || 'Upto 8% Crypto Cashback'}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* 6. Product image on the right: seamless blend with soft gradient mask */}
+                          {/* 5. Product image on the right: seamless blend with soft gradient mask */}
                           {formImage && (
                             <div
                               className="absolute right-0 top-0 bottom-0 w-[52%] z-10 flex items-end justify-end pointer-events-none overflow-hidden rounded-r-[24px]"
@@ -892,19 +878,34 @@ export default function StoreBannersPage({ onShowToast }) {
                             </div>
                           )}
 
-                          {/* 7. Bottom-right glowing yellow badge: exactly matching Reference Image 2 */}
-                          {(formBadgeText || formLiveLabel) && (
-                            <div className="absolute right-2.5 bottom-2.5 z-20 pointer-events-none">
-                              <div className="px-2.5 py-1.5 rounded-xl bg-gradient-to-b from-[#FFD200] via-[#FFBA00] to-[#FFA000] text-slate-950 shadow-[0_6px_16px_rgba(245,158,11,0.45)] border border-yellow-200/60 flex flex-col items-center justify-center text-center leading-tight">
-                                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-slate-950 block">
-                                  {formBadgeText || 'THE BIG SPILL DAYS'}
+                          {/* 6. Bottom Row: Left CS Cashback Chip + Right Campaign Badge (Side-by-side, Zero Overlap) */}
+                          <div className="relative z-20 flex items-end justify-between gap-2 mt-auto pt-2">
+                            {(formRewardText || 'Upto 8% Crypto Cashback') ? (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-white text-[11px] font-bold shadow-sm min-w-0 max-w-[56%] shrink">
+                                <span className="px-1.5 py-0.5 rounded-[4px] bg-yellow-400 text-black font-black text-[9px] leading-none shrink-0">
+                                  CS
                                 </span>
-                                <span className="text-[8px] sm:text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-950 text-[#FFD200] mt-0.5 tracking-wide shadow-inner block">
-                                  {formLiveLabel || 'LIVE NOW'}
+                                <span className="truncate">
+                                  {formRewardText || 'Upto 8% Crypto Cashback'}
                                 </span>
                               </div>
-                            </div>
-                          )}
+                            ) : (
+                              <div />
+                            )}
+
+                            {(formBadgeText || formLiveLabel) && (
+                              <div className="shrink-0 pointer-events-none">
+                                <div className="px-2.5 py-1.5 rounded-xl bg-gradient-to-b from-[#FFD200] via-[#FFBA00] to-[#FFA000] text-slate-950 shadow-[0_6px_16px_rgba(245,158,11,0.45)] border border-yellow-200/60 flex flex-col items-center justify-center text-center leading-tight">
+                                  <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-slate-950 block whitespace-nowrap">
+                                    {formBadgeText || 'THE BIG SPILL DAYS'}
+                                  </span>
+                                  <span className="text-[8px] sm:text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-950 text-[#FFD200] mt-0.5 tracking-wide shadow-inner block whitespace-nowrap">
+                                    {formLiveLabel || 'LIVE NOW'}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {/* 1-Click Reference Button */}

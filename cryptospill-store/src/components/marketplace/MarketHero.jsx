@@ -158,7 +158,7 @@ export default function MarketHero({ onExploreClick }) {
               <div
                 key={banner._id || banner.title}
                 onClick={() => handleCardClick(banner)}
-                className="group relative shrink-0 w-[84vw] max-w-[340px] sm:w-[320px] md:w-[330px] lg:w-[calc(25%-12px)] h-[210px] sm:h-[225px] rounded-[28px] p-4 sm:p-5 text-white shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between border border-white/10 select-none"
+                className="group relative shrink-0 w-[84vw] max-w-[340px] sm:w-[320px] md:w-[330px] lg:w-[calc(25%-12px)] lg:min-w-[285px] h-[210px] sm:h-[225px] rounded-[28px] p-4 sm:p-5 text-white shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between border border-white/10 select-none"
                 style={{
                   background: `linear-gradient(135deg, ${rawBg} 0%, #080d19 100%)`,
                   scrollSnapAlign: 'start'
@@ -206,19 +206,7 @@ export default function MarketHero({ onExploreClick }) {
                   )}
                 </div>
 
-                {/* 5. Bottom-left chip: CS yellow squircle + rewardText */}
-                <div className="relative z-10 flex items-center">
-                  {hasReward && (
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-white text-xs font-bold shadow-sm">
-                      <span className="px-1.5 py-0.5 rounded-[4px] bg-yellow-400 text-black font-black text-[10px] leading-none shrink-0">
-                        CS
-                      </span>
-                      <span className="truncate max-w-[130px] sm:max-w-[150px]">{banner.rewardText}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* 6. Product image on the right: seamless blend with soft gradient mask */}
+                {/* 5. Product image on the right: seamless blend with soft gradient mask */}
                 {hasImage && (
                   <div
                     className="absolute right-0 top-0 bottom-0 w-[50%] sm:w-[54%] z-10 flex items-end justify-end pointer-events-none overflow-hidden rounded-r-[28px]"
@@ -242,21 +230,34 @@ export default function MarketHero({ onExploreClick }) {
                   </div>
                 )}
 
-                {/* 7. Bottom-right glowing yellow badge: exactly matching Image 2 */}
-                {(hasBadge || liveText) && (
-                  <div className="absolute right-3 bottom-3 z-20 pointer-events-none">
-                    <div className="px-3.5 py-2 rounded-2xl bg-gradient-to-b from-[#FFD200] via-[#FFBA00] to-[#FFA000] text-slate-950 shadow-[0_8px_20px_rgba(245,158,11,0.45)] border border-yellow-200/60 flex flex-col items-center justify-center text-center leading-tight">
-                      {hasBadge && (
-                        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-950 block">
-                          {banner.badgeText}
-                        </span>
-                      )}
-                      <span className="text-[9px] sm:text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-950 text-[#FFD200] mt-1 tracking-wide shadow-inner block">
-                        {liveText}
+                {/* 6. Bottom Row: Left CS Cashback Chip + Right Campaign Badge (Side-by-side, Zero Overlap) */}
+                <div className="relative z-20 flex items-end justify-between gap-2 mt-auto pt-2">
+                  {hasReward ? (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/15 text-white text-[11px] sm:text-xs font-bold shadow-sm min-w-0 max-w-[56%] shrink">
+                      <span className="px-1.5 py-0.5 rounded-[4px] bg-yellow-400 text-black font-black text-[9px] sm:text-[10px] leading-none shrink-0">
+                        CS
                       </span>
+                      <span className="truncate">{banner.rewardText}</span>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div />
+                  )}
+
+                  {(hasBadge || liveText) && (
+                    <div className="shrink-0 pointer-events-none">
+                      <div className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-2xl bg-gradient-to-b from-[#FFD200] via-[#FFBA00] to-[#FFA000] text-slate-950 shadow-[0_4px_14px_rgba(245,158,11,0.4)] border border-yellow-200/60 flex flex-col items-center justify-center text-center leading-tight">
+                        {hasBadge && (
+                          <span className="text-[8.5px] sm:text-[9.5px] font-black uppercase tracking-wider text-slate-950 block whitespace-nowrap">
+                            {banner.badgeText}
+                          </span>
+                        )}
+                        <span className="text-[8px] sm:text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-950 text-[#FFD200] mt-0.5 tracking-wide shadow-inner block whitespace-nowrap">
+                          {liveText}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )
           })}
