@@ -9,6 +9,7 @@ import {
   uploadBannerImage
 } from '../../services/storeBannerService'
 import { PRESET_IMAGES } from '../../components/marketplace/marketplaceData'
+import { normalizeImageUrl } from '../../utils/imageUrl'
 
 // Curated preset background colors
 const PRESET_BG_COLORS = [
@@ -161,7 +162,7 @@ export default function StoreBannersPage({ onShowToast }) {
       const rewardText = data.rewardText || ''
       const badgeText = data.badgeText || ''
       const liveLabel = data.liveLabel || 'LIVE NOW'
-      const image = data.image || ''
+      const image = normalizeImageUrl(data.image || '')
       const backgroundColor = data.backgroundColor || '#1c1c1c'
       const linkUrl = data.linkUrl || ''
       const sortOrder = data.sortOrder !== undefined ? Number(data.sortOrder) : 0
@@ -228,7 +229,7 @@ export default function StoreBannersPage({ onShowToast }) {
     try {
       const uploadedUrl = await uploadBannerImage(file)
       if (uploadedUrl) {
-        setFormImage(uploadedUrl)
+        setFormImage(normalizeImageUrl(uploadedUrl))
         setFormImageFit('cover')
         notify('Image uploaded successfully!')
       } else if (localDataUrl) {
@@ -284,6 +285,8 @@ export default function StoreBannersPage({ onShowToast }) {
 
     setIsSubmitting(true)
 
+    const cleanImage = normalizeImageUrl(formImage.trim())
+
     try {
       if (modalMode === 'create') {
         // POST /store/banner/create
@@ -294,7 +297,7 @@ export default function StoreBannersPage({ onShowToast }) {
           rewardText: formRewardText.trim(),
           badgeText: formBadgeText.trim(),
           liveLabel: formLiveLabel.trim() || 'LIVE NOW',
-          image: formImage.trim(),
+          image: cleanImage,
           backgroundColor: formBackgroundColor.trim() || '#1c1c1c',
           linkUrl: formLinkUrl.trim(),
           sortOrder: Number(formSortOrder) || 0,
@@ -321,7 +324,7 @@ export default function StoreBannersPage({ onShowToast }) {
         if (formRewardText.trim() !== prev.rewardText) changedFields.rewardText = formRewardText.trim()
         if (formBadgeText.trim() !== prev.badgeText) changedFields.badgeText = formBadgeText.trim()
         if ((formLiveLabel.trim() || 'LIVE NOW') !== prev.liveLabel) changedFields.liveLabel = formLiveLabel.trim() || 'LIVE NOW'
-        if (formImage.trim() !== prev.image) changedFields.image = formImage.trim()
+        if (cleanImage !== prev.image) changedFields.image = cleanImage
         if (formBackgroundColor.trim() !== prev.backgroundColor) changedFields.backgroundColor = formBackgroundColor.trim()
         if (formLinkUrl.trim() !== prev.linkUrl) changedFields.linkUrl = formLinkUrl.trim()
         if (Number(formSortOrder) !== Number(prev.sortOrder)) changedFields.sortOrder = Number(formSortOrder) || 0
@@ -605,7 +608,7 @@ export default function StoreBannersPage({ onShowToast }) {
                       >
                         {row.image ? (
                           <img
-                            src={row.image}
+                            src={normalizeImageUrl(row.image)}
                             alt=""
                             className="w-full h-full object-contain"
                             onError={(e) => {
@@ -875,7 +878,7 @@ export default function StoreBannersPage({ onShowToast }) {
                               }}
                             >
                               <img
-                                src={formImage}
+                                src={normalizeImageUrl(formImage)}
                                 alt=""
                                 className={`w-full h-full drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] transition-all duration-300 ${
                                   formImageFit === 'contain'

@@ -5,6 +5,7 @@ import {
   getPublicWebsiteBlogBySlug,
   getBlogHeroBannerConfig
 } from '../services/storeBlogService'
+import { normalizeImageUrl } from '../utils/imageUrl'
 
 // Tracks fetched slugs in memory to prevent double-fetching / double-views in React StrictMode
 const fetchedSlugCache = new Set()
@@ -498,7 +499,7 @@ export default function BlogPage() {
             {article.coverImage && (
               <div className="w-full h-64 sm:h-96 relative bg-slate-950 overflow-hidden">
                 <img
-                  src={article.coverImage}
+                  src={normalizeImageUrl(article.coverImage)}
                   alt={article.title}
                   className="w-full h-full object-cover"
                 />
@@ -651,7 +652,7 @@ export default function BlogPage() {
                       {rel.coverImage && (
                         <div className="h-32 rounded-xl overflow-hidden mb-3 bg-slate-900">
                           <img
-                            src={rel.coverImage}
+                            src={normalizeImageUrl(rel.coverImage)}
                             alt={rel.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                           />
@@ -843,7 +844,7 @@ export default function BlogPage() {
                       <div className="h-48 relative overflow-hidden bg-slate-950">
                         {blog.coverImage ? (
                           <img
-                            src={blog.coverImage}
+                            src={normalizeImageUrl(blog.coverImage)}
                             alt={blog.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />

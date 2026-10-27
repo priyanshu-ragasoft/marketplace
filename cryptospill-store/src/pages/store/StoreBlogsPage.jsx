@@ -10,6 +10,7 @@ import {
   DEFAULT_BLOG_HERO_BANNER
 } from '../../services/storeBlogService'
 import { uploadBannerImage } from '../../services/storeBannerService'
+import { normalizeImageUrl } from '../../utils/imageUrl'
 
 const BANNER_IMAGE_PRESETS = [
   { label: 'None (Gradient)', url: '' },
@@ -156,7 +157,7 @@ export default function StoreBlogsPage({ onShowToast }) {
     try {
       const uploadedUrl = await uploadBannerImage(file)
       if (uploadedUrl) {
-        setFormCoverImage(uploadedUrl)
+        setFormCoverImage(normalizeImageUrl(uploadedUrl))
         notify('Cover image uploaded and synced successfully!')
       } else if (localDataUrl) {
         setFormCoverImage(localDataUrl)
@@ -197,7 +198,7 @@ export default function StoreBlogsPage({ onShowToast }) {
     try {
       const uploadedUrl = await uploadBannerImage(file)
       if (uploadedUrl) {
-        setBannerImage(uploadedUrl)
+        setBannerImage(normalizeImageUrl(uploadedUrl))
         notify('Hero banner image uploaded and synced successfully!')
       } else if (localDataUrl) {
         setBannerImage(localDataUrl)
@@ -290,7 +291,7 @@ export default function StoreBlogsPage({ onShowToast }) {
     setFormAuthorRole(blog.author?.role || 'Staff Writer')
     setFormAuthorAvatar(blog.author?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80')
     setFormReadTime(blog.readTime || '4 min read')
-    setFormCoverImage(blog.coverImage || COVER_PRESETS[0].url)
+    setFormCoverImage(normalizeImageUrl(blog.coverImage || COVER_PRESETS[0].url))
     setFormSummary(blog.summary || '')
     setFormContent(blog.content || '')
     setFormTags(Array.isArray(blog.tags) ? blog.tags.join(', ') : (blog.tags || ''))
@@ -307,7 +308,7 @@ export default function StoreBlogsPage({ onShowToast }) {
         if (details.author?.role) setFormAuthorRole(details.author.role)
         if (details.author?.avatar) setFormAuthorAvatar(details.author.avatar)
         if (details.readTime) setFormReadTime(details.readTime)
-        if (details.coverImage) setFormCoverImage(details.coverImage)
+        if (details.coverImage) setFormCoverImage(normalizeImageUrl(details.coverImage))
         if (details.summary) setFormSummary(details.summary)
         if (details.content) setFormContent(details.content)
         if (details.tags) setFormTags(Array.isArray(details.tags) ? details.tags.join(', ') : details.tags)
@@ -360,7 +361,7 @@ export default function StoreBlogsPage({ onShowToast }) {
         authorRole: formAuthorRole,
         authorAvatar: formAuthorAvatar,
         readTime: formReadTime,
-        coverImage: formCoverImage,
+        coverImage: normalizeImageUrl(formCoverImage),
         summary: formSummary,
         content: formContent,
         tags: formTags.split(',').map((t) => t.trim()).filter(Boolean),
@@ -565,7 +566,7 @@ export default function StoreBlogsPage({ onShowToast }) {
                     <td className="py-3.5 px-4 max-w-sm">
                       <div className="flex items-center gap-3">
                         <img
-                          src={blog.coverImage || COVER_PRESETS[0].url}
+                          src={normalizeImageUrl(blog.coverImage || COVER_PRESETS[0].url)}
                           alt={blog.title}
                           className="w-12 h-10 object-cover rounded-lg border border-slate-200 shrink-0"
                         />

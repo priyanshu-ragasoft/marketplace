@@ -13,6 +13,7 @@ import {
   deleteStoreCategory
 } from '../../services/storeCategoryService'
 import { uploadBannerImage } from '../../services/storeBannerService'
+import { normalizeImageUrl } from '../../utils/imageUrl'
 
 import appleWatchImg from '../../assets/apple-watch.jpg'
 import appleIpadImg from '../../assets/apple-ipad.jpg'
@@ -222,7 +223,7 @@ export default function StoreProductsPage({ onShowToast }) {
     // In edit modal, set the category select to category_id, not the slug
     setFormCategoryId(product.category_id || product.categoryInfo?._id || product.category || categories[0]?._id || '')
     setFormPriceUSD(product.priceUSD != null ? String(product.priceUSD) : '')
-    setFormImage(product.image || '')
+    setFormImage(normalizeImageUrl(product.image || ''))
     setFormMerchant(product.merchant || 'Apple Authorized Escrow Store')
     setFormBadge(product.badge || 'BEST SELLER')
     setFormRating(product.rating != null ? String(product.rating) : '5.0')
@@ -288,7 +289,7 @@ export default function StoreProductsPage({ onShowToast }) {
           res.data?.url ||
           res.data?.path ||
           res.data?.image
-        setFormImage(uploadedUrl)
+        setFormImage(normalizeImageUrl(uploadedUrl))
         notify('Image uploaded and synced successfully!')
       } else {
         const reader = new FileReader()
@@ -344,7 +345,7 @@ export default function StoreProductsPage({ onShowToast }) {
         category: formCategoryId, // category _id
         priceUSD: priceNum,
         priceCrypto: '',
-        image: formImage || appleIPhone18ProImg,
+        image: normalizeImageUrl(formImage) || appleIPhone18ProImg,
         merchant: formMerchant.trim() || 'Apple Authorized Escrow Store',
         badge: formBadge.trim().toUpperCase(),
         rating: parseFloat(formRating) || 5.0,
@@ -707,7 +708,7 @@ export default function StoreProductsPage({ onShowToast }) {
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 p-1 shrink-0 flex items-center justify-center overflow-hidden">
                             <img
-                              src={prod.image}
+                              src={normalizeImageUrl(prod.image)}
                               alt={prod.title}
                               className="w-full h-full object-contain"
                               onError={(e) => {
@@ -831,7 +832,7 @@ export default function StoreProductsPage({ onShowToast }) {
               >
                 <div className="relative h-44 bg-slate-50 p-3 flex items-center justify-center">
                   <img
-                    src={prod.image}
+                    src={normalizeImageUrl(prod.image)}
                     alt={prod.title}
                     className="w-full h-full object-contain"
                     onError={(e) => {

@@ -6,6 +6,7 @@ import {
   DEFAULT_BANNERS,
   PRESET_IMAGES
 } from '../../components/marketplace/marketplaceData'
+import { normalizeImageUrl } from '../../utils/imageUrl'
 
 export const GRADIENT_PRESETS = [
   { label: 'Dark Midnight', value: 'from-[#0f172a] via-[#1e293b] to-[#020617]', color: '#0f172a' },
@@ -302,7 +303,7 @@ export default function StoreHeroBannersManager({ onShowToast }) {
                   }}
                 >
                   <img
-                    src={banner.image}
+                    src={normalizeImageUrl(banner.image)}
                     alt={banner.offerSub}
                     className={`w-full h-full drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] ${
                       (banner.image && (banner.image.includes('apple-') || banner.image.includes('cutout')))
@@ -606,7 +607,7 @@ export default function StoreHeroBannersManager({ onShowToast }) {
                     }}
                   >
                     <img
-                      src={newBanner.customImageUrl.trim() || newBanner.image || PRESET_IMAGES[0]?.src}
+                      src={normalizeImageUrl(newBanner.customImageUrl.trim() || newBanner.image || PRESET_IMAGES[0]?.src)}
                       alt=""
                       className="h-full w-full object-cover object-center drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]"
                     />

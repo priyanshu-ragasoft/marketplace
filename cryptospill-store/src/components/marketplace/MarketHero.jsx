@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react'
 import logoImg from '../../assets/logo.png'
 import { getPublicWebsiteBanners } from '../../services/storeBannerService'
+import { normalizeImageUrl } from '../../utils/imageUrl'
 
 export default function MarketHero({ onExploreClick }) {
   const scrollRef = useRef(null)
@@ -227,7 +228,7 @@ export default function MarketHero({ onExploreClick }) {
                     }}
                   >
                     <img
-                      src={banner.image}
+                      src={normalizeImageUrl(banner.image)}
                       alt={banner.subtitle || banner.title || 'Product'}
                       className={`w-full h-full drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] transform transition-transform duration-500 group-hover:scale-105 ${
                         (banner.image && (banner.image.includes('apple-') || banner.image.includes('cutout')))

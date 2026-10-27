@@ -3,6 +3,7 @@ import {
   clearStoreAuth
 } from './storeStorage'
 import { getStoreApiBaseUrl, setStoreApiBaseUrl, parseApiError, fetchWithGatewayFallback, normalizeBaseUrl } from './storeAuthService'
+import { normalizeImageUrl } from '../utils/imageUrl'
 
 /**
  * Handle store session expiration (401)
@@ -164,7 +165,7 @@ export async function uploadBannerImage(file) {
             (typeof data === 'string' ? data : '')
 
           if (uploadedUrl) {
-            return uploadedUrl
+            return normalizeImageUrl(uploadedUrl)
           }
         } catch (fetchErr) {
           lastError = fetchErr
