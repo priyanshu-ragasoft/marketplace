@@ -171,7 +171,7 @@ export default function InfoPage({ pageSlug }) {
   // Render Page Content
   const renderContent = () => {
     switch (pageSlug) {
-      
+
       // 1. TRACK ACTIVE ORDER
       case 'track-order':
         return (
@@ -628,7 +628,7 @@ export default function InfoPage({ pageSlug }) {
   return (
     <div className="w-full bg-[#f8fafc] text-slate-900 min-h-screen py-8 sm:py-12">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Breadcrumb Navigation & Top Action */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-200/80 text-xs">
           <nav className="flex items-center gap-2 text-slate-500 font-medium">
@@ -659,7 +659,7 @@ export default function InfoPage({ pageSlug }) {
         {/* Page Hero Header Card */}
         <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm mb-8">
           <div className="max-w-3xl">
-            <span 
+            <span
               className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-md shadow-xs border border-yellow-300 inline-block mb-3"
               style={{ backgroundColor: '#facc15', color: '#000000' }}
             >
@@ -676,7 +676,7 @@ export default function InfoPage({ pageSlug }) {
 
         {/* Main 2-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* Main Content Area (8 Cols) */}
           <div className="lg:col-span-8">
             <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
@@ -686,7 +686,7 @@ export default function InfoPage({ pageSlug }) {
 
           {/* Right Sidebar Directory & Contacts (4 Cols) */}
           <div className="lg:col-span-4 space-y-6">
-            
+
             {/* Quick Navigation Card */}
             <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
               <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 mb-4 pb-2 border-b border-slate-100">
@@ -700,11 +700,10 @@ export default function InfoPage({ pageSlug }) {
                       <button
                         type="button"
                         onClick={() => navigate(`/help/${link.slug}`)}
-                        className={`w-full text-left px-3 py-2 rounded-xl font-bold transition flex items-center justify-between cursor-pointer ${
-                          isActive
+                        className={`w-full text-left px-3 py-2 rounded-xl font-bold transition flex items-center justify-between cursor-pointer ${isActive
                             ? 'bg-yellow-400 text-black shadow-2xs'
                             : 'text-slate-600 hover:bg-slate-50 hover:text-amber-700'
-                        }`}
+                          }`}
                       >
                         <span>{link.label}</span>
                         {isActive && <span>&rarr;</span>}
@@ -725,11 +724,10 @@ export default function InfoPage({ pageSlug }) {
                       <button
                         type="button"
                         onClick={() => navigate(link.slug === 'privacy' || link.slug === 'terms' ? `/legal/${link.slug}` : `/merchant/${link.slug}`)}
-                        className={`w-full text-left px-3 py-2 rounded-xl font-bold transition flex items-center justify-between cursor-pointer ${
-                          isActive
+                        className={`w-full text-left px-3 py-2 rounded-xl font-bold transition flex items-center justify-between cursor-pointer ${isActive
                             ? 'bg-yellow-400 text-black shadow-2xs'
                             : 'text-slate-600 hover:bg-slate-50 hover:text-amber-700'
-                        }`}
+                          }`}
                       >
                         <span>{link.label}</span>
                         {isActive && <span>&rarr;</span>}
@@ -756,10 +754,7 @@ export default function InfoPage({ pageSlug }) {
                     support@cryptospill.store
                   </a>
                 </p>
-                <p>
-                  <span className="text-slate-400">Escrow Desk:</span>{' '}
-                  <span className="text-slate-900 font-bold">escrow@cryptospill.store</span>
-                </p>
+
               </div>
 
               <div className="pt-4 border-t border-slate-100">

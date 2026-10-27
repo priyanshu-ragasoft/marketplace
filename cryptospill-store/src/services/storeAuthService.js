@@ -35,8 +35,10 @@ export function getStoreApiBaseUrl() {
   }
 
   // Check if we're running on Vite dev server (localhost)
+  const host = typeof window !== 'undefined' ? window.location.hostname : ''
+  const localHost = host === 'localhost' || host === '127.0.0.1' || /^192\.168\.\d+\.\d+$/.test(host) || /^10\.\d+\.\d+\.\d+$/.test(host)
   const isLocalDev = typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+    localHost &&
     (window.location.port === '5173' || window.location.port === '5174')
 
   // In local dev, use Vite proxy path — same origin, zero CORS preflight

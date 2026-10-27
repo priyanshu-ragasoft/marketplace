@@ -61,11 +61,9 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, promptMess
           {/* Top Header - Fixed/Sticky so title & 'X' close are always visible */}
           <div className="shrink-0 px-5 sm:px-10 pt-5 sm:pt-7 pb-4 sm:pb-5 border-b border-slate-100 flex items-start justify-between bg-white">
             <div>
-              <p className="text-[10.5px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
-                EARN CASHBACK EVERY TIME YOU SHOP
-              </p>
+            
               <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 mt-0.5 leading-tight">
-                Login with CryptoSpill
+                Login with CryptoSpill Community Store
               </h2>
             </div>
 
@@ -111,36 +109,34 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, promptMess
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <p>
-                      Web3 wallet authentication &amp; 0% escrow enabled. Sign in with your registered username and verified crypto wallet address.
+                      CryptoSpill Community Store is the member shop. Sign in with your username and the wallet on your account to place orders and follow them.
                     </p>
                   </div>
-
-                  {/* Informational Perks: Compact on mobile, spacious on desktop */}
                   <div className="hidden sm:block space-y-3 pt-1 text-xs sm:text-sm text-slate-700 font-medium">
                     <div className="flex items-center gap-2.5">
                       <span className="text-emerald-500 font-black text-sm sm:text-base">✔</span>
-                      <span>100% Escrow Multi-Sig Protection</span>
+                      <span>Orders, address, and receipt stay on your account</span>
                     </div>
                     <div className="flex items-center gap-2.5">
                       <span className="text-amber-500 font-black text-sm sm:text-base">✔</span>
-                      <span>Instant crypto cashback credited on orders</span>
+                      <span>Wallet reward points can be used at checkout</span>
                     </div>
                     <div className="flex items-center gap-2.5">
                       <span className="text-blue-500 font-black text-sm sm:text-base">✔</span>
-                      <span>Priority verified merchant dispatch</span>
+                      <span>Follow each order from placed to delivered</span>
                     </div>
                   </div>
 
                   {/* Mobile Compact Pills - Single Line */}
                   <div className="flex sm:hidden items-center justify-between gap-1.5 pt-0.5 text-[10px] font-bold">
                     <span className="flex-1 text-center py-1 px-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/80 whitespace-nowrap">
-                      ✔ 100% Escrow
+                      ✔ Your orders
                     </span>
                     <span className="flex-1 text-center py-1 px-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200/80 whitespace-nowrap">
-                      ✔ Cashback
+                      ✔ Rewards
                     </span>
                     <span className="flex-1 text-center py-1 px-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/80 whitespace-nowrap">
-                      ✔ Verified Dispatch
+                      ✔ Tracking
                     </span>
                   </div>
                 </div>
@@ -154,14 +150,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, promptMess
                     onClose()
                   }}
                 />
-
-                {/* Escrow Reassurance */}
-                <div className="pt-4 sm:pt-5 text-center flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-500 font-medium">
-                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>100% Buyer Protection &amp; Escrow Guarantee</span>
-                </div>
               </div>
 
             </div>

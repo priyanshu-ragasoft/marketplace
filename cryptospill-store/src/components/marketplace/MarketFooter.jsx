@@ -2,6 +2,11 @@ import React, { useState } from 'react'
 import BrandLogo from '../common/BrandLogo'
 import { Link, useRouter } from '../../router/RouterContext'
 
+import trustDelivery3D from '../../assets/trust-delivery-3d.png'
+import trustAuthenticity3D from '../../assets/trust-authenticity-3d.png'
+import trustEscrow3D from '../../assets/trust-escrow-3d.png'
+import trustTicket3D from '../../assets/trust-ticket-3d.png'
+
 export default function MarketFooter() {
   const { navigate } = useRouter()
   const [newsletterEmail, setNewsletterEmail] = useState('')
@@ -27,63 +32,101 @@ export default function MarketFooter() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x lg:divide-slate-200/80">
 
             {/* Delivery */}
-            <div className="flex items-start gap-4 lg:pr-8 group cursor-default">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-300/40 text-amber-700 flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-yellow-400 group-hover:text-black group-hover:border-yellow-400 group-hover:scale-105 shadow-2xs">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-                  <path d="M15 18H9" />
-                  <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
-                  <circle cx="17" cy="18" r="2" />
-                  <circle cx="7" cy="18" r="2" />
-                </svg>
+            <div className="flex items-center sm:items-start gap-4 lg:pr-6 group cursor-default">
+              <div className="w-16 h-16 sm:w-18 sm:h-18 lg:w-18 lg:h-18 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                <img
+                  src={trustDelivery3D}
+                  alt="Insured Priority Air Delivery"
+                  className="w-full h-full object-contain filter drop-shadow-[0_6px_14px_rgba(209,166,27,0.28)]"
+                />
               </div>
-              <div>
-                <h4 className="text-[13px] font-bold text-slate-900 group-hover:text-black transition-colors">Free Insured Express Delivery</h4>
-                <p className="text-[11.5px] text-slate-500 mt-1 leading-snug">Air shipping via FedEx &amp; DHL on orders over $500. Tracked in real-time.</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60">
+                    AIR FREIGHT
+                  </span>
+                </div>
+                <h4 className="text-[13px] font-extrabold text-slate-900 group-hover:text-black transition-colors leading-snug">
+                  Insured Express Priority Delivery
+                </h4>
+                <p className="text-[11.5px] text-slate-500 mt-1 leading-snug">
+                  Direct FedEx &amp; DHL air cargo with live telemetry. 100% DDP customs prepaid worldwide.
+                </p>
               </div>
             </div>
 
             {/* Genuine Guarantee */}
-            <div className="flex items-start gap-4 lg:px-8 group cursor-default">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-300/40 text-amber-700 flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-yellow-400 group-hover:text-black group-hover:border-yellow-400 group-hover:scale-105 shadow-2xs">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-                  <path d="m9 12 2 2 4-4" />
-                </svg>
+            <div className="flex items-center sm:items-start gap-4 lg:px-6 group cursor-default">
+              <div className="w-16 h-16 sm:w-18 sm:h-18 lg:w-18 lg:h-18 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                <img
+                  src={trustAuthenticity3D}
+                  alt="100% Genuine & Sealed"
+                  className="w-full h-full object-contain filter drop-shadow-[0_6px_14px_rgba(209,166,27,0.28)]"
+                />
               </div>
-              <div>
-                <h4 className="text-[13px] font-bold text-slate-900 group-hover:text-black transition-colors">100% Genuine Apple Sealed</h4>
-                <p className="text-[11.5px] text-slate-500 mt-1 leading-snug">Original serial numbers with 1-Year Apple warranty valid worldwide.</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60">
+                    APPLE GSX
+                  </span>
+                </div>
+                <h4 className="text-[13px] font-extrabold text-slate-900 group-hover:text-black transition-colors leading-snug">
+                  100% Factory-Sealed Authentic
+                </h4>
+                <p className="text-[11.5px] text-slate-500 mt-1 leading-snug">
+                  Original verifiable serial numbers with official 1-Year Apple warranty valid worldwide.
+                </p>
               </div>
             </div>
 
             {/* Escrow Pay */}
-            <div className="flex items-start gap-4 lg:px-8 group cursor-default">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-300/40 text-amber-700 flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-yellow-400 group-hover:text-black group-hover:border-yellow-400 group-hover:scale-105 shadow-2xs">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="18" height="11" x="3" y="11" rx="2.5" ry="2.5" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  <circle cx="12" cy="16" r="1.5" />
-                  <path d="M12 17.5v2" />
-                </svg>
+            <div className="flex items-center sm:items-start gap-4 lg:px-6 group cursor-default">
+              <div className="w-16 h-16 sm:w-18 sm:h-18 lg:w-18 lg:h-18 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                <img
+                  src={trustEscrow3D}
+                  alt="0% Safe Escrow Protection"
+                  className="w-full h-full object-contain filter drop-shadow-[0_6px_14px_rgba(209,166,27,0.28)]"
+                />
               </div>
-              <div>
-                <h4 className="text-[13px] font-bold text-slate-900 group-hover:text-black transition-colors">0% Safe Escrow Protection</h4>
-                <p className="text-[11.5px] text-slate-500 mt-1 leading-snug">Smart contract vault locks funds until you verify and accept delivery.</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200/60">
+                    2-OF-3 VAULT
+                  </span>
+                </div>
+                <h4 className="text-[13px] font-extrabold text-slate-900 group-hover:text-black transition-colors leading-snug">
+                  Zero-Risk Multi-Sig Escrow
+                </h4>
+                <p className="text-[11.5px] text-slate-500 mt-1 leading-snug">
+                  Crypto stays locked in smart contract vault until you physically unbox, inspect &amp; approve.
+                </p>
               </div>
             </div>
 
-            {/* Support */}
-            <div className="flex items-start gap-4 lg:pl-8 group cursor-default">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-300/40 text-amber-700 flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-yellow-400 group-hover:text-black group-hover:border-yellow-400 group-hover:scale-105 shadow-2xs">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5a9 9 0 0 1 18 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
-                  <path d="M21 16v1.5a3.5 3.5 0 0 1-3.5 3.5H14" />
-                </svg>
+            {/* Support / Ticket Raise */}
+            <div
+              onClick={() => navigate('/help/replacement-policy')}
+              className="flex items-center sm:items-start gap-4 lg:pl-6 group cursor-pointer"
+            >
+              <div className="w-16 h-16 sm:w-18 sm:h-18 lg:w-18 lg:h-18 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                <img
+                  src={trustTicket3D}
+                  alt="Raise Support Ticket 24/7"
+                  className="w-full h-full object-contain filter drop-shadow-[0_6px_14px_rgba(209,166,27,0.28)]"
+                />
               </div>
-              <div>
-                <h4 className="text-[13px] font-bold text-slate-900 group-hover:text-black transition-colors">24x7 Dedicated Shopper Desk</h4>
-                <p className="text-[11.5px] text-slate-500 mt-1 leading-snug">Personal human support for order status, serial checks &amp; checkout help.</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200/60">
+                    RAISE TICKET
+                  </span>
+                </div>
+                <h4 className="text-[13px] font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors leading-snug">
+                  Raise a Support Ticket
+                </h4>
+                <p className="text-[11.5px] text-slate-500 mt-1 leading-snug">
+                  Submit an instant ticket for order disputes, hardware claims, transit issues &amp; escrow arbitration.
+                </p>
               </div>
             </div>
 
@@ -105,8 +148,8 @@ export default function MarketFooter() {
             </div>
 
             <form onSubmit={handleSubscribe} className="flex items-center gap-2 w-full md:w-auto max-w-md">
-             
-              
+
+
             </form>
           </div>
         </div>

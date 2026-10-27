@@ -9,7 +9,7 @@ export default function InfoSidebar({ currentSlug }) {
     { path: '/help/escrow-guide', slug: 'escrow-guide', label: 'How Escrow Protects You' },
     { path: '/help/replacement-policy', slug: 'replacement-policy', label: '14-Day Replacement Policy' },
     { path: '/help/shipping-coverage', slug: 'shipping-coverage', label: 'Shipping Coverage' },
-    { path: '/help/warranty', slug: 'warranty', label: 'Warranty Verification' },
+    // { path: '/help/warranty', slug: 'warranty', label: 'Warranty Verification' },
     { path: '/help/faq', slug: 'faq', label: 'Frequently Asked Questions' },
   ]
 
@@ -38,11 +38,10 @@ export default function InfoSidebar({ currentSlug }) {
                 <button
                   type="button"
                   onClick={() => navigate(link.path)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl font-bold transition flex items-center justify-between cursor-pointer ${
-                    isActive
-                      ? 'bg-yellow-400 text-black shadow-2xs'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-amber-700'
-                  }`}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl font-bold transition flex items-center justify-between cursor-pointer ${isActive
+                    ? 'bg-yellow-400 text-black shadow-2xs'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-amber-700'
+                    }`}
                 >
                   <span>{link.label}</span>
                   {isActive && <span>&rarr;</span>}
@@ -65,11 +64,10 @@ export default function InfoSidebar({ currentSlug }) {
                 <button
                   type="button"
                   onClick={() => navigate(link.path)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl font-bold transition flex items-center justify-between cursor-pointer ${
-                    isActive
-                      ? 'bg-yellow-400 text-black shadow-2xs'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-amber-700'
-                  }`}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl font-bold transition flex items-center justify-between cursor-pointer ${isActive
+                    ? 'bg-yellow-400 text-black shadow-2xs'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-amber-700'
+                    }`}
                 >
                   <span>{link.label}</span>
                   {isActive && <span>&rarr;</span>}
@@ -96,10 +94,7 @@ export default function InfoSidebar({ currentSlug }) {
               support@cryptospill.store
             </a>
           </p>
-          <p>
-            <span className="text-slate-400">Escrow Desk:</span>{' '}
-            <span className="text-slate-900 font-bold">escrow@cryptospill.store</span>
-          </p>
+
         </div>
         <div className="pt-4 border-t border-slate-100">
           <button

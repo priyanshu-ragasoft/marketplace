@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import BrandLogo from '../common/BrandLogo'
+import rewardsGift from '../../assets/rewards-ao1.png'
+import profileAvatar from '../../assets/profile-avatar.png'
+import cartBag from '../../assets/cart-ao1.png'
+import loginMark from '../../assets/login-ao1.png'
+import logoutMark from '../../assets/logout-ao1.png'
 import { useRouter } from '../../router/RouterContext'
 import { getPublicActiveAnnouncements } from '../../services/storeAnnouncementService'
 
@@ -79,16 +84,6 @@ export default function MarketNavbar({
   const rawName = (currentUser?.display_name || currentUser?.name || currentUser?.user_name || currentUser?.username || 'Shopper').trim()
   const userDisplayName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : 'Shopper'
   const userUsername = currentUser?.user_name || currentUser?.username || (currentUser?.email ? currentUser.email.split('@')[0] : 'shopper')
-
-  // Dynamic Avatar initials from name
-  const avatarInitials = (() => {
-    const name = (userDisplayName || '').trim()
-    const parts = name.split(/\s+/)
-    if (parts.length >= 2 && parts[0] && parts[1]) {
-      return (parts[0][0] + parts[1][0]).toUpperCase()
-    }
-    return name.slice(0, 2).toUpperCase() || 'CS'
-  })()
 
   // Reward Points from API (reward_points in response, e.g. 3001)
   const rawRewards = currentUser?.reward_points !== undefined
@@ -184,19 +179,16 @@ export default function MarketNavbar({
               className="hidden sm:flex items-center gap-2.5 px-3 h-10 rounded-xl bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300/80 transition-all select-none cursor-default shadow-xs"
               title={`${formattedRewards} Spill Reward Points`}
             >
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 flex items-center justify-center shadow-xs shrink-0 font-black">
-                <svg className="w-3.5 h-3.5 text-slate-950" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              </div>
+              <img
+                src={rewardsGift}
+                alt=""
+                className="h-8 w-8 shrink-0 object-contain"
+              />
               <div className="text-left flex flex-col justify-center leading-none">
                 <span className="text-[9px] text-slate-400 uppercase tracking-wider font-extrabold mb-1">
                   REWARDS
                 </span>
-                <div className="text-xs font-black text-slate-900 leading-none flex items-center gap-1">
-                  <span>{formattedRewards}</span>
-                  <span className="text-[9.5px] font-black text-amber-500">PTS</span>
-                </div>
+                <span className="text-xs font-black text-slate-900 leading-none">{formattedRewards}</span>
               </div>
             </div>
           )}
@@ -206,12 +198,10 @@ export default function MarketNavbar({
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}
-            className="relative h-10 w-10 bg-slate-50 hover:bg-slate-100/90 active:scale-95 text-slate-700 hover:text-slate-950 border border-slate-200/90 hover:border-slate-300/80 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-xs group"
+            className="relative h-11 w-11 bg-transparent hover:bg-slate-50 active:scale-95 border border-transparent hover:border-slate-200 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0 group"
             title="Open Shopping Cart"
           >
-            <svg className="w-5 h-5 group-hover:scale-105 transition-transform text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
+            <img src={cartBag} alt="" className="h-10 w-10 object-contain group-hover:scale-105 transition-transform" />
             {cartCount > 0 && (
               <span
                 className="absolute -top-1.5 -right-1.5 bg-amber-400 text-slate-950 text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-xs border-2 border-white animate-scaleIn"
@@ -227,11 +217,9 @@ export default function MarketNavbar({
               <button
                 type="button"
                 onClick={onOpenLogin}
-                className="h-10 px-3 sm:px-5 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-bold text-xs sm:text-sm transition-all shadow-sm hover:shadow flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="h-10 pl-1.5 pr-3 sm:pr-4 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-bold text-xs sm:text-sm transition-all shadow-sm hover:shadow flex items-center gap-1.5 cursor-pointer shrink-0"
               >
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                </svg>
+                <img src={loginMark} alt="" className="h-8 w-8 object-contain" />
                 <span>Login</span>
               </button>
             </div>
@@ -242,27 +230,19 @@ export default function MarketNavbar({
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className={`h-10 flex items-center gap-2 pl-2 pr-2.5 sm:px-3 rounded-xl transition-all cursor-pointer text-left shrink-0 shadow-xs active:scale-95 group ${
                   isProfileOpen 
-                    ? 'bg-white border-amber-400 ring-2 ring-amber-400/20' 
+                    ? 'bg-white border-[#D1A61B] ring-2 ring-[#D1A61B]/20' 
                     : 'bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300/80'
                 }`}
               >
-                {/* Yellow Profile Avatar with dynamic user initials from API */}
-                <div
-                  className="w-6.5 h-6.5 rounded-lg font-black text-xs flex items-center justify-center shadow-xs uppercase shrink-0 bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950"
-                >
-                  {avatarInitials}
-                </div>
-                <div className="hidden sm:flex items-center gap-1.5 leading-none">
+                <img
+                  src={profileAvatar}
+                  alt=""
+                  className="h-8 w-8 shrink-0 object-contain"
+                />
+                <div className="hidden sm:flex items-center leading-none">
                   <span className="text-xs font-bold text-slate-900 truncate max-w-[120px]">
                     {userDisplayName}
                   </span>
-                  {currentUser?.is_premium && (
-                    <span
-                      className="px-1.5 py-0.5 rounded text-[8.5px] font-black uppercase leading-none shadow-xs shrink-0 tracking-wider bg-amber-400 text-slate-950"
-                    >
-                      PRO
-                    </span>
-                  )}
                 </div>
                 <svg className={`w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition-transform duration-200 shrink-0 ${isProfileOpen ? 'rotate-180 text-slate-700' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
@@ -278,26 +258,20 @@ export default function MarketNavbar({
                     aria-hidden="true" 
                     onClick={() => setIsProfileOpen(false)} 
                   />
-                  <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden z-50 text-xs animate-fadeIn">
+                  <div className="absolute right-0 mt-2 max-h-[70vh] w-72 overflow-y-auto sm:w-80 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 text-xs animate-fadeIn">
                   {/* Top Header Card */}
                   <div className="p-4 bg-gradient-to-b from-slate-50/90 to-white border-b border-slate-100">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div
-                          className="w-9 h-9 rounded-xl font-black text-xs flex items-center justify-center uppercase shrink-0 shadow-xs bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950"
-                        >
-                          {avatarInitials}
-                        </div>
+                        <img
+                          src={profileAvatar}
+                          alt=""
+                          className="h-10 w-10 shrink-0 object-contain"
+                        />
                         <div>
                           <div className="flex items-center gap-1.5">
                             <p className="font-extrabold text-slate-900 text-sm leading-tight">{userDisplayName}</p>
-                            {currentUser?.is_premium && (
-                              <span
-                                className="px-1.5 py-0.5 rounded text-[8.5px] font-black uppercase leading-none tracking-wider bg-amber-400 text-slate-950"
-                              >
-                                PRO
-                              </span>
-                            )}
+                           
                           </div>
                           <p className="text-slate-400 text-xs font-mono font-medium leading-tight mt-0.5">@{userUsername}</p>
                         </div>
@@ -354,7 +328,7 @@ export default function MarketNavbar({
                         )}
                         <div className="bg-white px-2 py-1 rounded border border-slate-200/70 text-left">
                           <span className="block text-[8.5px] uppercase font-bold text-slate-400 leading-tight">Rewards</span>
-                          <span className="block font-mono text-[10px] font-bold text-amber-600 truncate leading-tight mt-0.5">{formattedRewards} PTS</span>
+                          <span className="block font-mono text-[10px] font-bold text-[#D1A61B] truncate leading-tight mt-0.5">{formattedRewards} </span>
                         </div>
                       </div>
                     )}
@@ -399,12 +373,10 @@ export default function MarketNavbar({
                         setIsProfileOpen(false)
                         onLogout()
                       }}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 font-bold transition cursor-pointer"
+                      className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl text-slate-900 hover:bg-white font-bold transition cursor-pointer"
                     >
+                      <img src={logoutMark} alt="" className="h-8 w-8 object-contain" />
                       <span>Log Out</span>
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
                     </button>
                   </div>
                 </div>

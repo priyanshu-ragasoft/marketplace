@@ -3,9 +3,11 @@ import { fetchInrPerUsd, quoteStoreRewards } from '../../services/storeRewardSer
 import { createStoreDelivery } from '../../services/storeDeliveryService'
 import Ao1CurrencyConverter from './Ao1CurrencyConverter'
 import { saveOrderSlip } from '../../pages/OrderSlipPage'
+import cartBag from '../../assets/cart-ao1.png'
+import emptyCart from '../../assets/empty-cart.png'
 import { useRouter } from '../../router/RouterContext'
 
-const ETH_USD_RATE = 3480
+import { fetchEthUsdPrice, getCachedEthUsdPrice } from '../../services/cryptoPriceService'
 
 function roundUsd(value) {
   return Math.round(Number(value) * 100) / 100
@@ -46,6 +48,7 @@ export default function CartDrawer({
   const [quoteError, setQuoteError] = useState('')
   const [quoteLoading, setQuoteLoading] = useState(false)
   const [inrPerUsd, setInrPerUsd] = useState(null)
+  const [ethRate, setEthRate] = useState(() => getCachedEthUsdPrice())
   const [rateError, setRateError] = useState('')
   const [confirmError, setConfirmError] = useState('')
   const [converterOpen, setConverterOpen] = useState(false)
@@ -58,8 +61,9 @@ export default function CartDrawer({
   rewardsOnRef.current = useRewardPoints
   drawerOpenRef.current = isOpen
 
+  const activeEthRate = Number(ethRate) > 0 ? Number(ethRate) : 3480
   const subtotalUSD = cartItems.reduce((acc, item) => acc + item.priceUSD * item.quantity, 0)
-  const subtotalETH = (subtotalUSD / ETH_USD_RATE).toFixed(4)
+  const subtotalETH = (subtotalUSD / activeEthRate).toFixed(4)
   const cartUsd = roundUsd(subtotalUSD)
   const cartEth = Number(subtotalETH)
 
@@ -114,6 +118,12 @@ export default function CartDrawer({
           setRateError(err.message || 'Could not load today’s USD to INR rate.')
         }
       })
+
+    fetchEthUsdPrice()
+      .then((price) => {
+        if (!cancelled && price > 0) setEthRate(price)
+      })
+      .catch(() => {})
 
     return () => {
       cancelled = true
@@ -197,11 +207,11 @@ export default function CartDrawer({
       firstName: saved?.firstName || '',
       lastName: saved?.lastName || '',
       email: saved?.email || '',
-      countryCode: '+1',
+      countryCode: saved?.countryCode || '+1',
       phone: saved?.phone || '',
       address: saved?.address || '',
       pin: saved?.pin || '',
-      country: saved?.country || 'India',
+      country: saved?.country || 'United States',
       state: saved?.state || '',
       cartUsd,
       payableUsd: payUsd,
@@ -256,6 +266,7 @@ export default function CartDrawer({
 
   const rewardsPending = useRewardPoints && !quoteError && !rateError && (quoteLoading || !inrPerUsd || !quote)
   const visibleQuoteError = useRewardPoints ? (quoteError || rateError) : ''
+  const itemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0)
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -269,13 +280,15 @@ export default function CartDrawer({
         <div className="w-screen max-w-md bg-white border-l border-slate-200 text-slate-900 flex flex-col justify-between shadow-2xl h-full">
 
           {/* Drawer Header with Yellow Dot */}
-          <div className="p-6 border-b border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 shadow-[0_0_6px_#facc15]" />
-              <h2 className="text-lg font-black text-slate-900">Your Marketplace Cart</h2>
-              <span className="text-xs bg-yellow-100 text-amber-900 px-2.5 py-0.5 rounded-full font-bold border border-yellow-300">
-                {cartItems.reduce((acc, i) => acc + i.quantity, 0)}
-              </span>
+          <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <img src={cartBag} alt="" className="h-11 w-11 object-contain" />
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-slate-950">Your cart</h2>
+                <p className="text-xs font-medium text-slate-500">
+                  {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                </p>
+              </div>
             </div>
             <button
               type="button"
@@ -296,12 +309,9 @@ export default function CartDrawer({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-black text-slate-900 mb-2">Escrow Order Secured!</h3>
-              <p className="text-sm text-slate-500 max-w-xs mb-4">
-                Smart contract escrow transaction broadcasted to CryptoSpill Mainnet.
-              </p>
-              <p className="text-xs font-mono text-amber-600 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-200 font-bold">
-                TX: 0x9f8c...3b4a2e
+              <h3 className="text-xl font-black text-slate-950">Order placed</h3>
+              <p className="mt-1 max-w-xs text-sm text-slate-500">
+                Your payment is in. Finish delivery details on the order slip.
               </p>
               {confirmError && (
                 <p className="text-xs text-rose-600 mt-3 max-w-xs">{confirmError}</p>
@@ -311,85 +321,78 @@ export default function CartDrawer({
             <>
               {/* Cart Items List */}
               {cartItems.length > 0 ? (
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
                   {cartItems.map((item) => (
                     <div
                       key={item.id}
-                      className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3.5"
+                      className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"
                     >
                       <img
                         src={item.image}
-                        alt={item.title}
-                        className="w-14 h-14 object-contain rounded-lg bg-white p-1 border border-slate-200 shrink-0"
+                        alt=""
+                        className="h-16 w-16 shrink-0 rounded-xl border border-slate-100 bg-slate-50 object-contain p-1.5"
                       />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-bold text-slate-900 truncate">{item.title}</h4>
-                        <p className="text-xs font-bold text-slate-900 mt-0.5">
-                          ${item.priceUSD.toFixed(2)}
-                        </p>
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-2 mt-2">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="truncate text-sm font-bold text-slate-950">{item.title}</h4>
+                        <p className="mt-0.5 text-xs text-slate-500">{formatUsd(item.priceUSD)} each</p>
+                        <div className="mt-2 inline-flex items-center rounded-full border border-slate-200 bg-slate-50">
                           <button
                             type="button"
                             onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                            className="w-6 h-6 rounded bg-white hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center cursor-pointer border border-slate-200 shadow-2xs"
+                            className="flex h-7 w-7 cursor-pointer items-center justify-center text-sm font-bold text-slate-700"
+                            aria-label="Decrease quantity"
                           >
-                            -
+                            −
                           </button>
-                          <span className="text-xs font-bold px-1.5 text-slate-900">{item.quantity}</span>
+                          <span className="min-w-5 text-center text-xs font-bold text-slate-950">{item.quantity}</span>
                           <button
                             type="button"
                             onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                            className="w-6 h-6 rounded bg-white hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center cursor-pointer border border-slate-200 shadow-2xs"
+                            className="flex h-7 w-7 cursor-pointer items-center justify-center text-sm font-bold text-slate-700"
+                            aria-label="Increase quantity"
                           >
                             +
                           </button>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => onRemoveItem(item.id)}
-                        className="text-slate-400 hover:text-rose-600 p-1.5 cursor-pointer"
-                        title="Remove"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                      <div className="flex flex-col items-end gap-2">
+                        <p className="text-sm font-black text-slate-950">{formatUsd(item.priceUSD * item.quantity)}</p>
+                        <button
+                          type="button"
+                          onClick={() => onRemoveItem(item.id)}
+                          className="cursor-pointer text-[11px] font-bold text-slate-400 hover:text-rose-600"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
-                  <svg className="w-14 h-14 mx-auto mb-3 opacity-40 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                  <p className="text-sm font-semibold text-slate-700">Your cart is empty</p>
-                  <p className="text-xs text-slate-400 mt-1">Explore verified products and add them here</p>
+                <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
+                  <img src={emptyCart} alt="" className="h-30 w-30 object-contain" />
+                  <h3 className="mt-3 text-lg font-black text-slate-950">Your cart is empty</h3>
+                  <p className="mt-1 max-w-[16rem] text-sm text-slate-500">Browse the store and add something you want delivered.</p>
                 </div>
               )}
 
               {/* Drawer Footer with Totals and Checkout */}
               {cartItems.length > 0 && (
-                <div className="p-6 border-t border-slate-200 bg-slate-50/80 space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-600">
+                <div className="space-y-3 border-t border-slate-200 bg-white px-5 py-4">
+                  <div className="flex items-center justify-between text-sm text-slate-500">
                     <span>Subtotal</span>
-                    <span className="font-semibold text-slate-900">${subtotalUSD.toFixed(2)}</span>
+                    <span className="font-semibold text-slate-900">{formatUsd(subtotalUSD)}</span>
+                  </div>
+                  <div className="flex items-end justify-between border-t border-slate-100 pt-3">
+                    <span className="text-sm font-bold text-slate-950">To pay</span>
+                    <p className="text-2xl font-black tracking-tight text-slate-950">{formatUsd(payUsd)}</p>
                   </div>
 
-
-                  <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-200 font-bold">
-                    <span className="text-slate-900">Total Amount</span>
-                    <div className="text-right">
-                      <p className="text-lg font-black text-slate-950">{formatUsd(payUsd)}</p>
-
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 space-y-2">
+                  <div className="space-y-2 rounded-2xl border border-[#D1A61B]/30 bg-[#D1A61B]/5 px-3 py-3">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-bold text-slate-900">Use reward points</p>
+                        <p className="text-sm font-bold text-slate-950">Apply rewards</p>
+                        <p className="text-[11px] text-slate-500">Points lower the amount you pay.</p>
                       </div>
                       <button
                         type="button"
@@ -408,47 +411,47 @@ export default function CartDrawer({
                         <button
                           type="button"
                           onClick={() => setRedeemMode('full')}
-                          className={`rounded-lg px-2 py-1.5 text-[11px] font-bold cursor-pointer ${redeemMode === 'full' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}
+                          className={`rounded-lg px-2 py-1.5 text-[11px] font-bold cursor-pointer ${redeemMode === 'full' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600'}`}
                         >
-                          Use Full Reward Points
+                          Use all
                         </button>
                         <button
                           type="button"
                           onClick={() => setRedeemMode('manual')}
-                          className={`rounded-lg px-2 py-1.5 text-[11px] font-bold cursor-pointer ${redeemMode === 'manual' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}
+                          className={`rounded-lg px-2 py-1.5 text-[11px] font-bold cursor-pointer ${redeemMode === 'manual' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600'}`}
                         >
-                          Enter Manually
+                          Choose amount
                         </button>
                       </div>
                     )}
 
                     {useRewardPoints && redeemMode === 'full' && quote?.pointsAvailable != null && (
-                      <p className="text-[11px] text-slate-500">Available {formatPoints(quote.pointsAvailable)} PTS</p>
+                      <p className="text-[11px] text-slate-500">{formatPoints(quote.pointsAvailable)} points available</p>
                     )}
 
                     {useRewardPoints && redeemMode === 'manual' && (
                       <label className="block pt-1">
-                        <span className="text-[11px] font-semibold text-slate-600">Points to redeem</span>
+                        <span className="text-[11px] font-semibold text-slate-600">How many points?</span>
                         <input
                           type="number"
                           min="1"
                           step="1"
                           inputMode="numeric"
                           value={pointsInput}
-                          placeholder="Enter points"
+                          placeholder="For example, 100"
                           onChange={(event) => setPointsInput(event.target.value.replace(/[^\d]/g, ''))}
-                          className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-2 text-sm text-slate-900 outline-none focus:border-slate-900"
+                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-900 outline-none focus:border-slate-900"
                         />
                         {quote?.pointsAvailable != null && (
                           <span className="mt-1 block text-[11px] text-slate-500">
-                            Available {formatPoints(quote.pointsAvailable)} PTS
+                            You can use up to {formatPoints(quote.pointsAvailable)} points
                           </span>
                         )}
                       </label>
                     )}
 
                     {useRewardPoints && quoteLoading && !visibleQuoteError && (
-                      <p className="text-[11px] text-slate-500">Calculating reward credit...</p>
+                      <p className="text-[11px] text-slate-500">Checking your points...</p>
                     )}
 
                     {visibleQuoteError && (
@@ -458,13 +461,13 @@ export default function CartDrawer({
                     {useRewardPoints && rewardsReady && (
                       <div className="space-y-1.5 pt-1 border-t border-slate-100 text-[11px]">
                         <div className="flex items-center justify-between text-slate-600">
-                          <span>Points applied</span>
-                          <span className="font-bold text-slate-900">{formatPoints(quote.pointsApplied)} PTS</span>
+                          <span>Points used</span>
+                          <span className="font-bold text-slate-900">{formatPoints(quote.pointsApplied)}</span>
                         </div>
 
 
                         <div className="flex items-center justify-between text-slate-900 font-bold pt-1">
-                          <span>Amount due</span>
+                          <span>You pay</span>
                           <span className="text-right">
                             <span className="block">{formatUsd(quote.payableUsd)}</span>
                           </span>
@@ -485,11 +488,11 @@ export default function CartDrawer({
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
-                        <span>Confirming Escrow Lock...</span>
+                        <span>Opening checkout...</span>
                       </>
                     ) : (
                       <>
-                        <span>Checkout with Escrow Vault</span>
+                        <span>Continue to checkout</span>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
@@ -497,15 +500,13 @@ export default function CartDrawer({
                     )}
                   </button>
 
-                  <div className="flex items-center justify-between pt-1 text-[11px] text-slate-500">
-                    <button
-                      type="button"
-                      onClick={onClearCart}
-                      className="text-slate-500 hover:text-rose-600 transition cursor-pointer"
-                    >
-                      Clear All
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={onClearCart}
+                    className="w-full cursor-pointer pt-1 text-center text-[11px] font-bold text-slate-400 hover:text-rose-600"
+                  >
+                    Remove all items
+                  </button>
                 </div>
               )}
             </>

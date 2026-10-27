@@ -47,9 +47,9 @@ function compactName(value) {
   return String(value || '').toLowerCase().replace(/[^a-z]/g, '')
 }
 
-function matchCountry(value) {
-  if (!value) return 'India'
-  return Object.keys(LOCATIONS).find((name) => compactName(name) === compactName(value)) || 'India'
+export function matchCountry(value) {
+  if (!value) return 'United States'
+  return Object.keys(LOCATIONS).find((name) => compactName(name) === compactName(value)) || 'United States'
 }
 
 function matchState(country, value) {
@@ -87,36 +87,97 @@ async function lookupPin(pin, country) {
   return { country: 'India', state: office.State }
 }
 
+const PHONE_RULES = {
+  '+91': { min: 10, max: 10, pattern: /^[6-9]\d{9}$/, example: 'ten digit Indian mobile', message: 'Enter a valid Indian mobile number.' },
+  '+1': { min: 10, max: 10, pattern: /^[2-9]\d{9}$/, example: 'ten digit US/Canada number', message: 'Enter a valid US or Canada number.' },
+  '+44': { min: 10, max: 10, example: 'ten digit UK mobile', message: 'Enter a valid UK mobile number.' },
+  '+971': { min: 9, max: 9, pattern: /^5\d{8}$/, example: 'nine digit UAE mobile', message: 'Enter a valid UAE mobile number.' },
+  '+966': { min: 9, max: 9, pattern: /^5\d{8}$/, example: 'nine digit Saudi mobile', message: 'Enter a valid Saudi mobile number.' },
+  '+65': { min: 8, max: 8, pattern: /^[89]\d{7}$/, example: 'eight digit Singapore mobile', message: 'Enter a valid Singapore mobile number.' },
+  '+60': { min: 9, max: 10, example: 'Malaysia mobile digits', message: 'Enter a valid Malaysia number.' },
+  '+61': { min: 9, max: 9, example: 'nine digit Australia mobile', message: 'Enter a valid Australia number.' },
+  '+62': { min: 9, max: 12, example: 'Indonesia mobile digits', message: 'Enter a valid Indonesia number.' },
+  '+63': { min: 10, max: 10, pattern: /^9\d{9}$/, example: 'ten digit Philippines mobile', message: 'Enter a valid Philippines mobile number.' },
+  '+66': { min: 9, max: 9, example: 'nine digit Thailand mobile', message: 'Enter a valid Thailand number.' },
+  '+81': { min: 10, max: 10, example: 'ten digit Japan mobile', message: 'Enter a valid Japan number.' },
+  '+82': { min: 9, max: 11, example: 'South Korea mobile digits', message: 'Enter a valid South Korea number.' },
+  '+86': { min: 11, max: 11, pattern: /^1\d{10}$/, example: 'eleven digit China mobile', message: 'Enter a valid China mobile number.' },
+  '+84': { min: 9, max: 10, example: 'Vietnam mobile digits', message: 'Enter a valid Vietnam number.' },
+  '+92': { min: 10, max: 10, pattern: /^3\d{9}$/, example: 'ten digit Pakistan mobile', message: 'Enter a valid Pakistan mobile number.' },
+  '+880': { min: 10, max: 10, pattern: /^1\d{9}$/, example: 'ten digit Bangladesh mobile', message: 'Enter a valid Bangladesh mobile number.' },
+  '+94': { min: 9, max: 9, example: 'nine digit Sri Lanka mobile', message: 'Enter a valid Sri Lanka number.' },
+  '+977': { min: 10, max: 10, pattern: /^9\d{9}$/, example: 'ten digit Nepal mobile', message: 'Enter a valid Nepal mobile number.' },
+  '+49': { min: 10, max: 11, example: 'Germany mobile digits', message: 'Enter a valid Germany number.' },
+  '+33': { min: 9, max: 9, example: 'nine digit France mobile', message: 'Enter a valid France number.' },
+  '+39': { min: 9, max: 10, example: 'Italy mobile digits', message: 'Enter a valid Italy number.' },
+  '+34': { min: 9, max: 9, example: 'nine digit Spain mobile', message: 'Enter a valid Spain number.' },
+  '+55': { min: 10, max: 11, example: 'Brazil mobile digits', message: 'Enter a valid Brazil number.' },
+  '+27': { min: 9, max: 9, example: 'nine digit South Africa mobile', message: 'Enter a valid South Africa number.' },
+  '+234': { min: 10, max: 10, example: 'ten digit Nigeria mobile', message: 'Enter a valid Nigeria number.' },
+  '+254': { min: 9, max: 9, example: 'nine digit Kenya mobile', message: 'Enter a valid Kenya number.' },
+  '+7': { min: 10, max: 10, example: 'ten digit Russia mobile', message: 'Enter a valid Russia number.' }
+}
+
+export function phoneDigits(value) {
+  return String(value || '').replace(/\D/g, '')
+}
+
+export function phoneRule(countryCode) {
+  return PHONE_RULES[countryCode] || { min: 6, max: 15, example: '5551234567', message: 'Enter a valid phone number.' }
+}
+
+export function phoneValidationMessage(countryCode, phone) {
+  const digits = phoneDigits(phone)
+  const rule = phoneRule(countryCode)
+  if (!digits) return 'Enter the phone number.'
+  if (digits.length < rule.min || digits.length > rule.max || (rule.pattern && !rule.pattern.test(digits))) {
+    return rule.message
+  }
+  return ''
+}
+
 export const COUNTRY_CODES = [
-  { code: '+1', iso: 'us' },
-  { code: '+91', iso: 'in' },
-  { code: '+44', iso: 'gb' },
-  { code: '+971', iso: 'ae' },
-  { code: '+966', iso: 'sa' },
-  { code: '+65', iso: 'sg' },
-  { code: '+60', iso: 'my' },
-  { code: '+61', iso: 'au' },
-  { code: '+62', iso: 'id' },
-  { code: '+63', iso: 'ph' },
-  { code: '+66', iso: 'th' },
-  { code: '+81', iso: 'jp' },
-  { code: '+82', iso: 'kr' },
-  { code: '+86', iso: 'cn' },
-  { code: '+84', iso: 'vn' },
-  { code: '+92', iso: 'pk' },
-  { code: '+880', iso: 'bd' },
-  { code: '+94', iso: 'lk' },
-  { code: '+977', iso: 'np' },
-  { code: '+49', iso: 'de' },
-  { code: '+33', iso: 'fr' },
-  { code: '+39', iso: 'it' },
-  { code: '+34', iso: 'es' },
-  { code: '+55', iso: 'br' },
-  { code: '+27', iso: 'za' },
-  { code: '+234', iso: 'ng' },
-  { code: '+254', iso: 'ke' },
-  { code: '+7', iso: 'ru' }
+  { code: '+1', iso: 'us', name: 'United States' },
+  { code: '+91', iso: 'in', name: 'India' },
+  { code: '+44', iso: 'gb', name: 'United Kingdom' },
+  { code: '+971', iso: 'ae', name: 'United Arab Emirates' },
+  { code: '+966', iso: 'sa', name: 'Saudi Arabia' },
+  { code: '+65', iso: 'sg', name: 'Singapore' },
+  { code: '+60', iso: 'my', name: 'Malaysia' },
+  { code: '+61', iso: 'au', name: 'Australia' },
+  { code: '+62', iso: 'id', name: 'Indonesia' },
+  { code: '+63', iso: 'ph', name: 'Philippines' },
+  { code: '+66', iso: 'th', name: 'Thailand' },
+  { code: '+81', iso: 'jp', name: 'Japan' },
+  { code: '+82', iso: 'kr', name: 'South Korea' },
+  { code: '+86', iso: 'cn', name: 'China' },
+  { code: '+84', iso: 'vn', name: 'Vietnam' },
+  { code: '+92', iso: 'pk', name: 'Pakistan' },
+  { code: '+880', iso: 'bd', name: 'Bangladesh' },
+  { code: '+94', iso: 'lk', name: 'Sri Lanka' },
+  { code: '+977', iso: 'np', name: 'Nepal' },
+  { code: '+49', iso: 'de', name: 'Germany' },
+  { code: '+33', iso: 'fr', name: 'France' },
+  { code: '+39', iso: 'it', name: 'Italy' },
+  { code: '+34', iso: 'es', name: 'Spain' },
+  { code: '+55', iso: 'br', name: 'Brazil' },
+  { code: '+27', iso: 'za', name: 'South Africa' },
+  { code: '+234', iso: 'ng', name: 'Nigeria' },
+  { code: '+254', iso: 'ke', name: 'Kenya' },
+  { code: '+7', iso: 'ru', name: 'Russia' }
 ]
+
+export const COUNTRY_OPTIONS = ['United States', ...Object.keys(LOCATIONS).filter((name) => name !== 'United States')]
+
+export function dialCodeForCountry(country) {
+  if (country === 'Canada') return '+1'
+  return COUNTRY_CODES.find((item) => item.name === country)?.code || '+1'
+}
+
+export function countryForDialCode(code) {
+  const item = COUNTRY_CODES.find((row) => row.code === code)
+  return item && LOCATIONS[item.name] ? item.name : ''
+}
 
 function Flag({ iso }) {
   return (
@@ -128,60 +189,118 @@ function Flag({ iso }) {
   )
 }
 
-function CountryCodePicker({ value, onChange }) {
+export function FieldSelect({ value, onChange, options, placeholder = 'Select', disabled = false, className = '', menuMinWidth = 0, ariaLabel = 'Select' }) {
   const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
   const [menuStyle, setMenuStyle] = useState(null)
   const buttonRef = useRef(null)
-  const selected = COUNTRY_CODES.find((item) => item.code === value) || COUNTRY_CODES[0]
+  const searchRef = useRef(null)
+  const selected = options.find((item) => item.value === value)
+  const showSearch = options.length > 6
+  const needle = query.trim().toLowerCase()
+  const filtered = needle
+    ? options.filter((item) => item.label.toLowerCase().includes(needle) || String(item.value).toLowerCase().includes(needle))
+    : options
 
-  const toggle = () => {
-    if (open) {
-      setOpen(false)
-      return
+  useEffect(() => {
+    if (!open) return undefined
+    const place = () => {
+      const rect = buttonRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const width = Math.max(rect.width, menuMinWidth)
+      const spaceBelow = window.innerHeight - rect.bottom
+      const openUp = spaceBelow < 280 && rect.top > spaceBelow
+      const left = Math.min(rect.left, window.innerWidth - width - 8)
+      setMenuStyle({
+        left: Math.max(8, left),
+        width,
+        ...(openUp ? { bottom: window.innerHeight - rect.top + 6 } : { top: rect.bottom + 6 })
+      })
     }
-    const rect = buttonRef.current.getBoundingClientRect()
-    setMenuStyle({ top: rect.bottom + 4, left: rect.left, width: Math.max(rect.width, 132) })
-    setOpen(true)
-  }
+    place()
+    const timer = window.setTimeout(() => searchRef.current?.focus(), 0)
+    const onKey = (event) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('resize', place)
+    window.addEventListener('scroll', place, true)
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.clearTimeout(timer)
+      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', place, true)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open, menuMinWidth])
 
   return (
     <>
       <button
         type="button"
         ref={buttonRef}
-        onClick={toggle}
-        className="flex w-[6.75rem] shrink-0 items-center justify-between gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-2.5 text-sm font-semibold text-slate-900 outline-none focus:border-slate-900"
-        aria-label="Country code"
+        disabled={disabled}
+        aria-label={ariaLabel}
         aria-expanded={open}
+        aria-haspopup="listbox"
+        onClick={() => {
+          if (disabled) return
+          setQuery('')
+          setOpen((current) => !current)
+        }}
+        className={`flex w-full items-center justify-between gap-2 rounded-xl border bg-white px-3 py-2 text-left text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${open ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200 hover:border-slate-300'} ${className}`}
       >
-        <span className="flex items-center gap-1.5">
-          <Flag iso={selected.iso} />
-          <span>{selected.code}</span>
+        <span className={`flex min-w-0 items-center gap-2 ${selected ? 'font-semibold text-slate-900' : 'font-medium text-slate-400'}`}>
+          {selected?.iso && <Flag iso={selected.iso} />}
+          <span className="truncate">{selected?.label || placeholder}</span>
         </span>
-        <svg className="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+        <svg className={`h-4 w-4 shrink-0 text-slate-400 transition ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.25" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       {open && (
         <>
-          <button type="button" aria-label="Close country codes" className="fixed inset-0 z-[60] cursor-default" onClick={() => setOpen(false)} />
-          <ul className="fixed z-[70] max-h-52 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-xl" style={menuStyle}>
-            {COUNTRY_CODES.map((item) => (
-              <li key={item.iso}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onChange(item.code)
-                    setOpen(false)
-                  }}
-                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm font-semibold ${item.code === selected.code ? 'bg-slate-100 text-slate-900' : 'text-slate-700 hover:bg-slate-50'}`}
-                >
-                  <Flag iso={item.iso} />
-                  <span>{item.code}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <button type="button" aria-label="Close menu" className="fixed inset-0 z-[110] cursor-default" onClick={() => setOpen(false)} />
+          <div className="fixed z-[120] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.14)]" style={menuStyle}>
+            {showSearch && (
+              <div className="border-b border-slate-100 p-2">
+                <input
+                  ref={searchRef}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search"
+                  className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-slate-900 outline-none focus:border-slate-900"
+                />
+              </div>
+            )}
+            <ul className="max-h-56 overflow-y-auto py-1" role="listbox">
+              {filtered.length === 0 && <li className="px-3 py-2.5 text-sm text-slate-400">No matches</li>}
+              {filtered.map((item) => {
+                const active = item.value === value
+                return (
+                  <li key={item.iso || item.value || item.label}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={active}
+                      onClick={() => {
+                        onChange(item.value)
+                        setOpen(false)
+                      }}
+                      className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm ${active ? 'bg-slate-50 font-semibold text-slate-900' : 'text-slate-700 hover:bg-slate-50'}`}
+                    >
+                      {item.iso && <Flag iso={item.iso} />}
+                      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                      {active && (
+                        <svg className="h-4 w-4 shrink-0 text-[#D1A61B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
         </>
       )}
     </>
@@ -196,16 +315,16 @@ const EMPTY = {
   phone: '',
   address: '',
   pin: '',
-  country: 'India',
+  country: 'United States',
   state: ''
 }
 
 function Field({ label, children }) {
   return (
-    <label className="block">
+    <div className="block">
       <span className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</span>
       {children}
-    </label>
+    </div>
   )
 }
 
@@ -244,7 +363,7 @@ export default function DeliveryDetailsForm({ userName = '', initialValues, subm
 
   const fillFromPin = async (pinValue, countryValue) => {
     const pin = String(pinValue || '').trim()
-    const country = countryValue || form.country || 'India'
+    const country = countryValue || form.country || 'United States'
     if (pin.replace(/\D/g, '').length < 4) {
       setPinStatus('error')
       setPinMessage('Enter the PIN code first.')
@@ -270,8 +389,8 @@ export default function DeliveryDetailsForm({ userName = '', initialValues, subm
     setForm((current) => ({ ...current, pin }))
     setPinMessage('')
     const digits = pin.replace(/\D/g, '')
-    if ((form.country === 'India' || !form.country) && digits.length === 6) {
-      fillFromPin(digits, 'India')
+    if (form.country === 'United States' && digits.length === 6) {
+      fillFromPin(digits, 'United States')
     }
   }
 
@@ -280,6 +399,7 @@ export default function DeliveryDetailsForm({ userName = '', initialValues, subm
     setForm((current) => ({
       ...current,
       country,
+      countryCode: dialCodeForCountry(country),
       state: (LOCATIONS[country] || []).includes(current.state) ? current.state : ''
     }))
   }
@@ -310,8 +430,9 @@ export default function DeliveryDetailsForm({ userName = '', initialValues, subm
       setLocalError('Select a country code.')
       return
     }
-    if (details.phone.replace(/\D/g, '').length < 7) {
-      setLocalError('Enter a valid phone number.')
+    const phoneMessage = phoneValidationMessage(details.countryCode, details.phone)
+    if (phoneMessage) {
+      setLocalError(phoneMessage)
       return
     }
     if (details.address.length < 5) {
@@ -363,11 +484,39 @@ export default function DeliveryDetailsForm({ userName = '', initialValues, subm
           </Field>
           <Field label="Phone">
             <div className="flex gap-2">
-              <CountryCodePicker
-                value={form.countryCode}
-                onChange={(code) => setForm((current) => ({ ...current, countryCode: code }))}
+              <div className="w-[6.75rem] shrink-0">
+                <FieldSelect
+                  ariaLabel="Country code"
+                  value={form.countryCode}
+                  menuMinWidth={148}
+                  className="py-2.5"
+                  options={COUNTRY_CODES.map((item) => ({ value: item.code, label: item.code, iso: item.iso }))}
+                  onChange={(code) => setForm((current) => {
+                    const nextCountry = countryForDialCode(code)
+                    const list = LOCATIONS[nextCountry] || []
+                    return {
+                      ...current,
+                      countryCode: code,
+                      ...(nextCountry
+                        ? { country: nextCountry, state: list.includes(current.state) ? current.state : '' }
+                        : {})
+                    }
+                  })}
+                />
+              </div>
+              <input
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                className={inputClass}
+                value={form.phone}
+                maxLength={phoneRule(form.countryCode).max}
+                placeholder={phoneRule(form.countryCode).example}
+                onChange={(event) => {
+                  const max = phoneRule(form.countryCode).max
+                  setField('phone')({ target: { value: phoneDigits(event.target.value).slice(0, max) } })
+                }}
               />
-              <input type="tel" className={inputClass} value={form.phone} onChange={setField('phone')} autoComplete="tel-national" placeholder="Phone number" />
             </div>
           </Field>
           <Field label="Address">
@@ -390,19 +539,23 @@ export default function DeliveryDetailsForm({ userName = '', initialValues, subm
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Country">
-              <select className={inputClass} value={form.country} onChange={onCountryChange} autoComplete="country-name">
-                {Object.keys(LOCATIONS).map((country) => (
-                  <option key={country} value={country}>{country}</option>
-                ))}
-              </select>
+              <FieldSelect
+                ariaLabel="Country"
+                value={form.country}
+                className="py-2.5"
+                options={COUNTRY_OPTIONS.map((country) => ({ value: country, label: country }))}
+                onChange={(country) => onCountryChange({ target: { value: country } })}
+              />
             </Field>
             <Field label="State">
-              <select className={inputClass} value={stateOptions.includes(form.state) ? form.state : ''} onChange={setField('state')} autoComplete="address-level1">
-                <option value="">Select state</option>
-                {stateOptions.map((state) => (
-                  <option key={state} value={state}>{state}</option>
-                ))}
-              </select>
+              <FieldSelect
+                ariaLabel="State"
+                value={stateOptions.includes(form.state) ? form.state : ''}
+                placeholder="Select state"
+                className="py-2.5"
+                options={stateOptions.map((state) => ({ value: state, label: state }))}
+                onChange={(state) => setField('state')({ target: { value: state } })}
+              />
             </Field>
           </div>
           {pinMessage && (

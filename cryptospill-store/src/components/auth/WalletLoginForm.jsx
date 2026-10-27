@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { connectWithWalletConnect, disconnectWalletConnect } from '../../utils/walletConnectService'
+import React, { useEffect, useState } from 'react'
+import { connectWithWalletConnect, disconnectWalletConnect, restoreWalletConnect } from '../../utils/walletConnectService'
 
 // Official WalletConnect Brand Icon
 function WalletConnectBrandIcon({ className = "w-full h-full" }) {
@@ -17,11 +17,28 @@ function WalletConnectBrandIcon({ className = "w-full h-full" }) {
 export default function WalletLoginForm({ onLoginSuccess }) {
   const [userName, setUserName] = useState('')
   const [walletAddress, setWalletAddress] = useState('')
+  const [walletName, setWalletName] = useState('')
+  const [walletIcon, setWalletIcon] = useState('')
   const [isConnectingWallet, setIsConnectingWallet] = useState(false)
   const [isManualInputMode, setIsManualInputMode] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    restoreWalletConnect()
+      .then((res) => {
+        if (!cancelled && res?.address) {
+          setWalletAddress(res.address)
+          setWalletName(res.walletName || 'Wallet')
+          setWalletIcon(res.walletIcon || '')
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // Directly triggers official WalletConnect QR Modal (300+ wallets)
   const handleConnectWalletConnect = async () => {
@@ -32,6 +49,8 @@ export default function WalletLoginForm({ onLoginSuccess }) {
       const res = await connectWithWalletConnect()
       if (res && res.address) {
         setWalletAddress(res.address)
+        setWalletName(res.walletName || 'Wallet')
+        setWalletIcon(res.walletIcon || '')
         setIsManualInputMode(false)
       }
     } catch (err) {
@@ -48,13 +67,8 @@ export default function WalletLoginForm({ onLoginSuccess }) {
   const handleDisconnect = async () => {
     await disconnectWalletConnect()
     setWalletAddress('')
-  }
-
-  const handleCopyAddress = () => {
-    if (!walletAddress) return
-    navigator.clipboard.writeText(walletAddress)
-    setIsCopied(true)
-    setTimeout(() => setIsCopied(false), 1800)
+    setWalletName('')
+    setWalletIcon('')
   }
 
   const handleSubmit = async (e) => {
@@ -106,29 +120,17 @@ export default function WalletLoginForm({ onLoginSuccess }) {
         }),
       })
 
-      if (response.status === 429) {
-        setErrorMessage('Try again later.')
-        setIsLoading(false)
-        return
-      }
-
-      if (response.status === 417) {
-        setErrorMessage('Invalid wallet address')
-        setIsLoading(false)
-        return
-      }
-
-      if (response.status === 400) {
-        setErrorMessage('Unable to sign in')
-        setIsLoading(false)
-        return
-      }
-
       const result = await response.json().catch(() => null)
+      const apiMessage = typeof result?.message === 'string' ? result.message.trim() : ''
+
+      if (response.status === 429) {
+        setErrorMessage(apiMessage || 'Too many sign-in attempts. Try again in a few minutes.')
+        setIsLoading(false)
+        return
+      }
 
       if (!response.ok) {
-        const errorMsg = result?.message || 'Unable to sign in'
-        setErrorMessage(errorMsg)
+        setErrorMessage(apiMessage || 'The login server did not accept this username and wallet.')
         setIsLoading(false)
         return
       }
@@ -158,11 +160,10 @@ export default function WalletLoginForm({ onLoginSuccess }) {
           onLoginSuccess(userData)
         }
       } else {
-        const fallbackMsg = result?.message || 'Unable to sign in'
-        setErrorMessage(fallbackMsg)
+        setErrorMessage(apiMessage || 'The login server did not accept this username and wallet.')
       }
     } catch (err) {
-      setErrorMessage('Unable to sign in')
+      setErrorMessage('Could not reach the login server. Check your connection and try again.')
     } finally {
       setIsLoading(false)
     }
@@ -215,7 +216,7 @@ export default function WalletLoginForm({ onLoginSuccess }) {
             onClick={() => setIsManualInputMode(!isManualInputMode)}
             className="text-[11px] sm:text-xs font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer"
           >
-            {isManualInputMode ? '⚡ Connect via WalletConnect' : 'Or enter address manually'}
+            {isManualInputMode ? 'Connect via WalletConnect' : 'Or enter address manually'}
           </button>
         </div>
 
@@ -223,40 +224,33 @@ export default function WalletLoginForm({ onLoginSuccess }) {
         {walletAddress && !isManualInputMode ? (
           <div className="w-full px-3.5 py-3 rounded-xl border border-blue-300/80 bg-blue-50/50 flex items-center justify-between gap-2 transition shadow-xs">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-2xs border border-blue-200 bg-white">
-                <WalletConnectBrandIcon />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-blue-200 bg-white">
+                {walletIcon ? (
+                  <img src={walletIcon} alt="" className="h-full w-full object-contain" onError={() => setWalletIcon('')} />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center bg-slate-900 text-sm font-black text-white">
+                    {(walletName || 'W').slice(0, 1).toUpperCase()}
+                  </span>
+                )}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                  <span className="text-xs font-bold text-blue-950 truncate">
-                    WalletConnect Connected
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="truncate text-xs font-bold text-blue-950">
+                    Connected with {walletName || 'Wallet'}
                   </span>
                 </div>
-                <p className="font-mono text-xs text-slate-700 font-semibold tracking-tight truncate mt-0.5">
-                  {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={handleCopyAddress}
-                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition cursor-pointer shadow-2xs"
-                title="Copy address"
-              >
-                {isCopied ? 'Copied!' : 'Copy'}
-              </button>
-              <button
-                type="button"
-                onClick={handleDisconnect}
-                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-rose-200 bg-white hover:bg-rose-50 text-rose-600 transition cursor-pointer shadow-2xs"
-                title="Disconnect"
-              >
-                Disconnect
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleDisconnect}
+              className="shrink-0 cursor-pointer rounded-lg border border-rose-200 bg-white px-2.5 py-1 text-xs font-bold text-rose-600 shadow-2xs transition hover:bg-rose-50"
+              title="Disconnect"
+            >
+              Disconnect
+            </button>
           </div>
         ) : !isManualInputMode ? (
           /* STATE B: Direct WalletConnect Trigger (Black Border & Black Button) */

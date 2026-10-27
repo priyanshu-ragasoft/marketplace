@@ -20,12 +20,14 @@ import PrivacyPolicyPage from '../../pages/PrivacyPolicyPage'
 import TermsPage from '../../pages/TermsPage'
 import MyOrdersPage from '../../pages/MyOrdersPage'
 import OrderSlipPage from '../../pages/OrderSlipPage'
+import OrderConfirmedPage from '../../pages/OrderConfirmedPage'
 import EscrowStatusPage from '../../pages/EscrowStatusPage'
 import BlogPage from '../../pages/BlogPage'
 
 import LoginModal from '../auth/LoginModal'
 import { useRouter } from '../../router/RouterContext'
 import { addStoreCartItem, clearStoreCart, fetchStoreCart, removeStoreCartItem, updateStoreCartItem } from '../../services/storeCartService'
+import { restoreWalletConnect } from '../../utils/walletConnectService'
 
 export default function MarketplaceStore({ 
   isLoggedIn, 
@@ -58,8 +60,16 @@ export default function MarketplaceStore({
       .catch(() => {
         if (!cancelled) setCartItems([])
       })
+    const refresh = () => {
+      fetchStoreCart().then((items) => {
+        if (!cancelled) setCartItems(items)
+      }).catch(() => {})
+    }
+    window.addEventListener('store-cart-changed', refresh)
+    if (currentUser?.connected_wallet === 'WalletConnect') restoreWalletConnect().catch(() => {})
     return () => {
       cancelled = true
+      window.removeEventListener('store-cart-changed', refresh)
     }
   }, [isLoggedIn])
 
@@ -98,10 +108,11 @@ export default function MarketplaceStore({
   }
 
   const totalCartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0)
+  const checkoutSlip = currentPath.startsWith('/order/') && !currentPath.endsWith('/confirmed')
 
   return (
-    <div className={`${currentPath.startsWith('/order/') ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-[#f8fafc] text-slate-900 flex flex-col justify-between selection:bg-yellow-400 selection:text-black font-['Plus_Jakarta_Sans',sans-serif]`}>
-      {/* Marketplace Navigation Bar */}
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col justify-between selection:bg-yellow-400 selection:text-black font-['Plus_Jakarta_Sans',sans-serif]">
+      {!checkoutSlip && (
       <MarketNavbar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -126,6 +137,7 @@ export default function MarketplaceStore({
           if (onLogout) onLogout()
         }}
       />
+      )}
 
       {/* Main Routed Page Content */}
       <main className="flex-1">
@@ -164,6 +176,10 @@ export default function MarketplaceStore({
           <PrivacyPolicyPage />
         ) : currentPath === '/legal/terms' ? (
           <TermsPage />
+        ) : currentPath.startsWith('/order/') && currentPath.endsWith('/confirmed') ? (
+          <OrderConfirmedPage
+            orderId={decodeURIComponent(currentPath.slice('/order/'.length).replace(/\/confirmed$/, ''))}
+          />
         ) : currentPath.startsWith('/order/') ? (
           <OrderSlipPage
             orderId={decodeURIComponent(currentPath.slice('/order/'.length).split('/')[0])}

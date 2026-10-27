@@ -121,6 +121,10 @@ function ao1FromCrypto(amount, usdPrice, rates) {
   return amount * usdPrice * inrPerUsd * AO1_PER_INR
 }
 
+function itemIsUsdt(item) {
+  return item?.kind === 'crypto' && item?.gecko === 'tether'
+}
+
 function cryptoFromAo1(ao1, usdPrice, rates) {
   const inrPerUsd = rates.INR
   if (!inrPerUsd || !usdPrice) return NaN
@@ -289,7 +293,8 @@ export default function Ao1CurrencyConverter({ payableUsd = 0, onClose, onConfir
       ao1TextRef.current = nextAo1
       setAo1Text(nextAo1)
     }
-    setCoinText(formatAmount(coin, asset.digits))
+    const lockedUsdt = itemIsUsdt(asset) ? Number(payableUsd) || 0 : coin
+    setCoinText(formatAmount(lockedUsdt, asset.digits))
   }, [rates, asset, payableUsd])
 
   const onAo1Change = (value) => {
@@ -336,11 +341,9 @@ export default function Ao1CurrencyConverter({ payableUsd = 0, onClose, onConfir
       <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-2xl">
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-amber-600">Pay in AO1</p>
-            <h3 className="mt-1 text-xl font-black">Currency converter</h3>
-            <p className="mt-1 text-xs font-semibold text-slate-500">
-              {asset ? `${asset.name} from the current order value` : 'Live market rates'}
-            </p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-amber-600">Pay with USDT</p>
+            <h3 className="mt-1 text-xl font-black">Checkout</h3>
+           
           </div>
           <button type="button" onClick={onClose} className="rounded-full bg-slate-100 px-2.5 py-1 text-sm cursor-pointer">✕</button>
         </div>
@@ -377,6 +380,7 @@ export default function Ao1CurrencyConverter({ payableUsd = 0, onClose, onConfir
                   if (asset && Number.isFinite(amount)) setCoinText(formatAmount(amount, asset.digits))
                 }}
                 placeholder={loading ? '…' : '0.00'}
+                readOnly={itemIsUsdt(asset)}
                 className="w-36 shrink-0 bg-transparent text-right text-xl font-black tabular-nums text-slate-900 outline-none"
                 aria-label="Converted amount"
               />
@@ -473,7 +477,7 @@ export default function Ao1CurrencyConverter({ payableUsd = 0, onClose, onConfir
               code: asset?.code || '',
               name: asset?.name || asset?.code || '',
               digits: asset?.digits ?? 2,
-              amount: parseAmount(coinText),
+              amount: itemIsUsdt(asset) ? Number(payableUsd) || 0 : parseAmount(coinText),
               ao1: parseAmount(ao1Text)
             })}
             disabled={loading || !rates}
