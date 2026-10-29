@@ -7,6 +7,7 @@ import StoreDashboard from './pages/store/StoreDashboard'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import { hasStoreAuth, getStoreProfile, clearStoreAuth } from './services/storeStorage'
+import { exchangeMarketplaceToken } from './services/marketplaceHandoff'
 
 function MainContent() {
   const { currentPath, navigate } = useRouter()
@@ -33,6 +34,8 @@ function MainContent() {
   const [storeProfile, setStoreProfile] = useState(() => getStoreProfile())
 
   // Platform admin session state (sessionStorage)
+  const [handoffMessage, setHandoffMessage] = useState('')
+
   const [adminUser, setAdminUser] = useState(() => {
     try {
       const stored = sessionStorage.getItem('cryptospill_admin_session')
@@ -64,6 +67,42 @@ function MainContent() {
       window.removeEventListener('cryptospill_store_logged_out', handleStoreLoggedOut)
     }
   }, [navigate])
+
+  // Main app opens https://marketplace.cryptospill.io/?token=...
+  // Log in only when that token's user exists and the connected wallet matches.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const token = (params.get('token') || params.get('access_token') || '').trim()
+    if (!token) return
+
+    params.delete('token')
+    params.delete('access_token')
+    const next = params.toString()
+    const cleanUrl = `${window.location.pathname}${next ? `?${next}` : ''}${window.location.hash}`
+    window.history.replaceState({}, '', cleanUrl)
+
+    if (localStorage.getItem('access_token')) return
+
+    let cancelled = false
+    setHandoffMessage('Checking your account and wallet…')
+
+    exchangeMarketplaceToken(token)
+      .then((user) => {
+        if (cancelled) return
+        setHandoffMessage('')
+        handleCustomerLoginSuccess(user)
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setHandoffMessage(err?.message || 'Could not sign you in from this link.')
+      })
+
+    return () => {
+      cancelled = true
+    }
+    // Run once on landing. handleCustomerLoginSuccess is stable enough for this entry.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Customer handlers
   const handleOpenLogin = () => {
@@ -160,21 +199,35 @@ function MainContent() {
     return <StoreLoginPage onLoginSuccess={handleStoreLoginSuccess} />
   }
 
+  const handoffBanner = handoffMessage ? (
+    <div className="fixed inset-x-0 top-0 z-[80] px-4 py-3 text-center text-sm font-medium text-white bg-slate-900/95">
+      {handoffMessage}
+    </div>
+  ) : null
+
   // C. DEDICATED CUSTOMER LOGIN ROUTE: /login
   if (currentPath === '/login') {
-    return <LoginPage onLoginSuccess={handleCustomerLoginSuccess} />
+    return (
+      <>
+        {handoffBanner}
+        <LoginPage onLoginSuccess={handleCustomerLoginSuccess} />
+      </>
+    )
   }
 
   // D. MAIN STOREFRONT MARKETPLACE: Root (/), Products (/product/:id), Help (/help/*), Legal (/legal/*)
   return (
-    <MarketplaceStore
-      isLoggedIn={isLoggedIn}
-      currentUser={currentUser}
-      onLoginSuccess={handleCustomerLoginSuccess}
-      onOpenLogin={handleOpenLogin}
-      onLogout={handleCustomerLogout}
-      onRewardPointsUpdated={handleRewardPointsUpdated}
-    />
+    <>
+      {handoffBanner}
+      <MarketplaceStore
+        isLoggedIn={isLoggedIn}
+        currentUser={currentUser}
+        onLoginSuccess={handleCustomerLoginSuccess}
+        onOpenLogin={handleOpenLogin}
+        onLogout={handleCustomerLogout}
+        onRewardPointsUpdated={handleRewardPointsUpdated}
+      />
+    </>
   )
 }
 
