@@ -46,7 +46,9 @@ export function mapCartItems(data) {
     title: item.title,
     priceUSD: Number(item.priceUSD) || 0,
     quantity: Number(item.quantity) || 1,
-    image: item.image || ''
+    image: item.image || '',
+    color: item.color || '',
+    colorHex: item.colorHex || ''
   }))
 }
 
@@ -63,6 +65,8 @@ export async function addStoreCartItem(product) {
       title: product.title || 'Product',
       priceUSD: Number(product.priceUSD) || 0,
       image: product.image || '',
+      color: product.color || product.selectedVariant?.color || '',
+      colorHex: product.colorHex || product.selectedVariant?.colorHex || '',
       quantity: 1
     })
   })

@@ -334,6 +334,12 @@ export default function CartDrawer({
                       />
                       <div className="min-w-0 flex-1">
                         <h4 className="truncate text-sm font-bold text-slate-950">{item.title}</h4>
+                        {item.color ? (
+                          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+                            <span className="inline-block h-3 w-3 rounded-full border border-slate-300" style={{ backgroundColor: item.colorHex || '#94a3b8' }} />
+                            {item.color}
+                          </p>
+                        ) : null}
                         <p className="mt-0.5 text-xs text-slate-500">{formatUsd(item.priceUSD)} each</p>
                         <div className="mt-2 inline-flex items-center rounded-full border border-slate-200 bg-slate-50">
                           <button

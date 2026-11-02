@@ -93,18 +93,18 @@ export default function StoreLoginPage({ onLoginSuccess }) {
             <div className="mb-4">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-yellow-300 text-[11px] font-bold tracking-[0.2em] uppercase shadow-sm backdrop-blur-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
-                <span>STORE OPERATIONS PORTAL</span>
+                <span>Merchant desk</span>
               </div>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] font-black text-white leading-[1.14] tracking-tight mb-5">
-              Manage your storefront, escrow &amp; operations with confidence.
+              The merchant desk for the CryptoSpill marketplace.
             </h1>
 
             {/* Subtitle / Paragraph */}
             <p className="text-neutral-400 text-sm sm:text-base leading-relaxed font-normal mb-8 max-w-lg">
-              Official merchant workstation for the CryptoSpill marketplace. Authenticate with your merchant credentials to manage profile settings, monitor token sessions, and control storefront details.
+              Sign in to run the catalog, orders, banners, and the storefront buyers see.
             </p>
 
             {/* Feature Highlights Grid */}
@@ -117,7 +117,7 @@ export default function StoreLoginPage({ onLoginSuccess }) {
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white">Verified Security</div>
-                  <div className="text-[11px] text-neutral-400 mt-0.5">JWT token &amp; password auth</div>
+                  <div className="text-[11px] text-neutral-400 mt-0.5">Merchant sign-in only</div>
                 </div>
               </div>
 
@@ -155,9 +155,9 @@ export default function StoreLoginPage({ onLoginSuccess }) {
               <div className="mb-2.5">
                 <BrandLogo size="default" isDarkBackground={true} />
               </div>
-              <h2 className="text-2xl font-black text-white tracking-tight mt-3">Store Login</h2>
+              <h2 className="text-2xl font-black text-white tracking-tight mt-3">Merchant sign in</h2>
               <p className="text-neutral-400 text-xs sm:text-[13px] font-normal leading-normal mt-1">
-                Authenticate with your store credentials to access store controls and profile settings.
+                Use your CryptoSpill merchant email and password.
               </p>
             </div>
 

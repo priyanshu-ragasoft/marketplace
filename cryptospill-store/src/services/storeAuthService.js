@@ -101,8 +101,12 @@ export async function fetchWithGatewayFallback(endpoint, options = {}) {
   const envBase = normalizeBaseUrl(import.meta.env.VITE_STORE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'https://apis.cryptospill.io')
   const altBase = primaryBase !== envBase ? envBase : null
 
+  if (!altBase) {
+    return fetch(primaryUrl, options)
+  }
+
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), 3500)
+  const timer = setTimeout(() => controller.abort(), 15000)
 
   try {
     const response = await fetch(primaryUrl, {

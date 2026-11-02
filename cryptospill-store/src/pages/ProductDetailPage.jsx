@@ -5,8 +5,16 @@ import { getPublicWebsiteProducts } from '../services/storeProductService'
 export default function ProductDetailPage({ productId, initialProduct, onAddToCart, onBuyNow }) {
   const { navigate } = useRouter()
   const [quantity, setQuantity] = useState(1)
+  const [variantIndex, setVariantIndex] = useState(0)
+
+  useEffect(() => {
+    setVariantIndex(0)
+    setZoomPoint(null)
+  }, [productId])
+
   const [activeTab, setActiveTab] = useState('specs') // 'specs' | 'escrow' | 'shipping' | 'reviews'
   const [addedToast, setAddedToast] = useState(false)
+  const [zoomPoint, setZoomPoint] = useState(null)
 
   const [product, setProduct] = useState(() => {
     if (initialProduct && String(initialProduct._id || initialProduct.id) === String(productId)) {
@@ -43,10 +51,12 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
 
           if (current) {
             setProduct(current)
-            const related = list
-              .filter((p) => String(p._id || p.id) !== String(current._id || current.id))
-              .slice(0, 4)
-            setRelatedProducts(related)
+            const currentCategory = String(current.category_id || current.categoryInfo?._id || current.categoryInfo?.id || '')
+          const others = list.filter((p) => String(p._id || p.id) !== String(current._id || current.id))
+          const sameCategory = currentCategory
+            ? others.filter((p) => String(p.category_id || p.categoryInfo?._id || p.categoryInfo?.id || '') === currentCategory)
+            : []
+          setRelatedProducts((sameCategory.length ? sameCategory : others).slice(0, 3))
           } else if (!product) {
             setErrorMessage('Product not found in current marketplace catalog.')
           }
@@ -74,17 +84,62 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
     }
   }, [productId])
 
+  const variants = Array.isArray(product?.variants) ? product.variants : []
+  const selectedVariant = variants[variantIndex] || null
+  const modelOptions = [...new Set(variants.map((item) => item.model).filter(Boolean))]
+  const scoped = variants.filter((item) => !selectedVariant?.model || item.model === selectedVariant.model)
+  const colorOptions = scoped.filter((item, index, list) => item.color && list.findIndex((row) => row.color === item.color) === index)
+  const storageOptions = [...new Set(scoped.filter((item) => !selectedVariant?.color || item.color === selectedVariant.color).map((item) => item.storage).filter(Boolean))]
+  const chooseVariant = (next) => {
+    const model = next.model ?? selectedVariant?.model
+    const color = next.color ?? selectedVariant?.color
+    const storage = next.storage ?? selectedVariant?.storage
+    const score = (item) => (item.model === model ? 4 : 0) + (item.color === color ? 2 : 0) + (item.storage === storage ? 1 : 0)
+    let best = 0
+    let bestScore = -1
+    variants.forEach((item, index) => {
+      const value = score(item)
+      if (value > bestScore) {
+        best = index
+        bestScore = value
+      }
+    })
+    setVariantIndex(best)
+  }
+  const displayPrice = selectedVariant?.price > 0 ? selectedVariant.price : product?.priceUSD
+  const lineTotal = (Number(displayPrice) || 0) * quantity
+  const displayImage = selectedVariant?.image || product?.image
+  const variantInStock = selectedVariant ? selectedVariant.inStock !== false : product?.inStock !== false
+  const variantKey = selectedVariant
+    ? [selectedVariant.model, selectedVariant.storage, selectedVariant.color].filter(Boolean).join('|')
+    : ''
+  const lineId = product && variantKey ? `${product._id || product.id}::${variantKey}` : (product?._id || product?.id)
+  const cartProduct = product ? {
+    ...product,
+    id: lineId,
+    _id: lineId,
+    image: displayImage,
+    priceUSD: displayPrice,
+    inStock: variantInStock,
+    color: selectedVariant?.color || '',
+    colorHex: selectedVariant?.colorHex || '',
+    selectedVariant: selectedVariant || null,
+    title: selectedVariant
+      ? [product.title, selectedVariant.storage, selectedVariant.color].filter(Boolean).join(' · ')
+      : product.title,
+  } : null
+
   const handleAdd = () => {
-    if (!product || product.inStock === false) return
+    if (!cartProduct || cartProduct.inStock === false) return
     for (let i = 0; i < quantity; i++) {
-      onAddToCart(product)
+      onAddToCart(cartProduct)
     }
     setAddedToast(true)
     setTimeout(() => setAddedToast(false), 2000)
   }
 
   const handleInstantBuy = () => {
-    if (!product || product.inStock === false) return
+    if (!cartProduct || cartProduct.inStock === false) return
     handleAdd()
     if (onBuyNow) {
       onBuyNow(product)
@@ -126,11 +181,13 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
   }
 
   const categoryName = product.categoryInfo?.name || (typeof product.category === 'string' ? product.category.replace(/-/g, ' ') : 'Hardware')
+  const subcategoryName = product.subcategoryInfo?.name || ''
+  const categoryLabel = subcategoryName ? `${categoryName} · ${subcategoryName}` : categoryName
   const ratingStars = Math.min(5, Math.max(1, Math.round(Number(product.rating || 5))))
   const specsList = Array.isArray(product.specs) ? product.specs : []
 
   return (
-    <div className="w-full bg-[#f8fafc] text-slate-900 min-h-screen py-6 sm:py-10">
+    <div className="w-full bg-[#f8fafc] text-slate-900 min-h-screen py-6 sm:py-10 pb-24 sm:pb-10">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb Navigation & Back Button */}
@@ -143,7 +200,7 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
               <span>Home</span>
             </Link>
             <span className="text-slate-300">/</span>
-            <span className="capitalize text-slate-600">{categoryName}</span>
+            <span className="capitalize text-slate-600">{categoryLabel}</span>
             <span className="text-slate-300">/</span>
             <span className="text-slate-900 font-bold truncate max-w-[200px] sm:max-w-none">{product.title}</span>
           </nav>
@@ -180,14 +237,31 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
           
           {/* Left Column: Image Showcase (5 Cols) */}
           <div className="lg:col-span-5 flex flex-col gap-5">
-            <div className="relative aspect-square w-full rounded-2xl bg-slate-50 border border-slate-200/80 p-8 flex items-center justify-center overflow-hidden group">
+            <div
+              className="relative aspect-square w-full rounded-2xl bg-slate-50 border border-slate-200/80 p-8 flex items-center justify-center overflow-hidden cursor-crosshair"
+              onMouseMove={(event) => {
+                if (window.matchMedia('(pointer: coarse)').matches) return
+                const photo = event.currentTarget.querySelector('img')
+                if (!photo) return
+                const box = photo.getBoundingClientRect()
+                const x = ((event.clientX - box.left) / box.width) * 100
+                const y = ((event.clientY - box.top) / box.height) * 100
+                if (x < 0 || y < 0 || x > 100 || y > 100) {
+                  setZoomPoint(null)
+                  return
+                }
+                setZoomPoint({ x, y })
+              }}
+              onMouseLeave={() => setZoomPoint(null)}
+            >
               <img
-                src={product.image}
+                src={displayImage}
                 alt={product.title}
                 onError={(e) => {
                   e.target.style.opacity = '0.5'
                 }}
-                className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                className="max-h-full max-w-full object-contain transition-transform duration-150 ease-out"
+                style={zoomPoint ? { transformOrigin: `${zoomPoint.x}% ${zoomPoint.y}%`, transform: 'scale(2.15)' } : undefined}
               />
               
               {/* Product Badge - Yellow accent when badge is not empty */}
@@ -241,7 +315,7 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
                   <span className="text-emerald-700 font-bold">&bull; Authorized Escrow</span>
                 </div>
 
-                {product.inStock === false ? (
+                {variantInStock === false ? (
                   <span className="px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-bold text-xs flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-rose-500" />
                     Out of Stock
@@ -266,22 +340,18 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
                   <span className="font-bold text-slate-900">{product.rating ?? '5.0'}</span>
                   <span className="text-slate-400">({product.reviews ?? 0} verified buyer reviews)</span>
                 </div>
-                <span className="text-slate-300">&bull;</span>
-                <span className="text-slate-600 font-mono text-[11px] bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
-                  Item #{String(product._id || product.id).slice(-6)}
-                </span>
               </div>
 
               {/* Price Banner */}
               <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wider block mb-0.5">
-                    Decentralized Escrow Price
-                  </span>
                   <div className="flex items-baseline gap-3">
                     <span className="text-3xl sm:text-4xl font-black text-slate-950">
-                      ${Number(product.priceUSD || 0).toFixed(2)}
+                      ${lineTotal.toFixed(2)}
                     </span>
+                    {quantity > 1 && (
+                      <span className="text-sm font-bold text-slate-500">${Number(displayPrice || 0).toFixed(2)} each</span>
+                    )}
                   </div>
                 </div>
 
@@ -291,6 +361,61 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
                 </div>
               </div>
 
+              {variants.length > 0 && (
+                <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-5">
+                  {modelOptions.length > 1 && (
+                    <div>
+                      <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">Option <span className="normal-case tracking-normal text-slate-900">{selectedVariant?.model}</span></p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {modelOptions.map((option) => (
+                          <button key={option} type="button" onClick={() => chooseVariant({ model: option })} className={`rounded-xl border px-3 py-3 text-left text-sm font-bold cursor-pointer ${selectedVariant?.model === option ? 'border-slate-950 bg-slate-950 text-white' : 'border-slate-200 bg-white text-slate-900 hover:border-slate-400'}`}>{option}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {colorOptions.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">Color <span className="normal-case tracking-normal text-slate-900">{selectedVariant?.color}</span></p>
+                      <div className="flex flex-wrap gap-3">
+                        {colorOptions.map((option) => {
+                          const active = selectedVariant?.color === option.color
+                          return (
+                            <button key={option.color} type="button" onClick={() => chooseVariant({ color: option.color })} title={option.color} className={`flex h-10 w-10 items-center justify-center rounded-full border-2 cursor-pointer ${active ? 'border-slate-950' : 'border-transparent'}`}>
+                              <span className="h-7 w-7 rounded-full border border-black/10" style={{ backgroundColor: option.colorHex || '#94a3b8' }} />
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {colorOptions.map((option) => {
+                          const active = selectedVariant?.color === option.color
+                          if (!option.image) return null
+                          return (
+                            <button key={option.color} type="button" onClick={() => { setZoomPoint(null); chooseVariant({ color: option.color }) }} className={`h-14 w-14 overflow-hidden rounded-xl border bg-slate-50 cursor-pointer ${active ? 'border-slate-950' : 'border-slate-200'}`}>
+                              <img src={option.image} alt={option.color} className="h-full w-full object-contain" />
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  {storageOptions.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">Detail</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {storageOptions.map((option) => {
+                          const match = variants.find((item) => item.storage === option && (!selectedVariant?.color || item.color === selectedVariant.color))
+                          const priceLabel = match && match.price > 0 ? ` · $${Number(match.price).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : ''
+                          return (
+                            <button key={option} type="button" onClick={() => { setZoomPoint(null); chooseVariant({ storage: option }) }} className={`rounded-xl border px-3 py-3 text-sm font-bold cursor-pointer ${selectedVariant?.storage === option ? 'border-slate-950 bg-slate-950 text-white' : 'border-slate-200 bg-white text-slate-900 hover:border-slate-400'}`}>{option}{priceLabel}</button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Description */}
               <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
                 {product.description}
@@ -298,7 +423,7 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
 
               {/* Quantity & CTA Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4 border-t border-slate-100 mb-6">
-                {product.inStock === false ? (
+                {variantInStock === false ? (
                   <div className="w-full py-4 px-6 rounded-2xl bg-slate-100 border border-slate-200 text-slate-500 font-extrabold text-xs sm:text-sm text-center">
                     This item is currently out of stock. Instant decentralized escrow checkout is disabled.
                   </div>
@@ -494,14 +619,14 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
           <div className="mt-12">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                More Items in Catalog
+                You may also like
               </h2>
               <Link to="/" className="text-xs font-bold text-slate-900 hover:text-amber-600 transition">
                 View All Products &rarr;
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedProducts.map((rel) => {
                 const relId = rel._id || rel.id
                 return (
@@ -522,7 +647,7 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase">
-                        {rel.categoryInfo?.name || (typeof rel.category === 'string' ? rel.category : '')}
+                        {[rel.categoryInfo?.name, rel.subcategoryInfo?.name].filter(Boolean).join(' · ') || (typeof rel.category === 'string' ? rel.category : '')}
                       </p>
                       <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-amber-600 line-clamp-1 mt-0.5">
                         {rel.title}
@@ -538,6 +663,16 @@ export default function ProductDetailPage({ productId, initialProduct, onAddToCa
           </div>
         )}
 
+      </div>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 backdrop-blur sm:hidden">
+        <div className="mx-auto flex max-w-3xl items-center gap-3">
+          <div className="min-w-0">
+            <p className="text-lg font-black text-slate-950">${lineTotal.toFixed(2)}</p>
+          </div>
+          <button type="button" onClick={handleAdd} disabled={variantInStock === false} className="flex-1 rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white disabled:opacity-40">
+            {variantInStock === false ? 'Out of Stock' : 'Add to Cart'}
+          </button>
+        </div>
       </div>
     </div>
   )

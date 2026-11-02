@@ -85,6 +85,21 @@ async function authorizedStoreProductFetch(endpoint, options = {}) {
   return resultJson
 }
 
+function cleanVariants(value) {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((item) => ({
+      model: String(item?.model || '').trim(),
+      storage: String(item?.storage || '').trim(),
+      color: String(item?.color || '').trim(),
+      colorHex: String(item?.colorHex || '').trim(),
+      price: item?.price ? Number(item.price) || 0 : 0,
+      image: String(item?.image || '').trim(),
+      inStock: item?.inStock !== false,
+    }))
+    .filter((item) => item.model || item.storage || item.color || item.image)
+}
+
 /**
  * GET /store/product/list?search_key=&category=&stock=&sort=&page=1&limit=100
  * category is category _id, or omit for all.
@@ -99,6 +114,9 @@ export async function getStoreProductList(params = {}) {
   // category is the category _id, or omit it for all categories.
   if (params.category && params.category !== 'all' && String(params.category).trim() !== '') {
     query.append('category', String(params.category).trim())
+  }
+  if (params.subcategory && params.subcategory !== 'all' && String(params.subcategory).trim() !== '') {
+    query.append('subcategory', String(params.subcategory).trim())
   }
 
   query.append('stock', String(params.stock || 'all'))
@@ -156,6 +174,7 @@ export async function createStoreProduct(productData) {
   const payload = {
     title: productData.title.trim(),
     category: productData.category || '',
+    subcategory: productData.subcategory ? String(productData.subcategory).trim() : '',
     priceUSD: priceUSD,
     priceCrypto: productData.priceCrypto ? String(productData.priceCrypto).trim() : '',
     image: productData.image ? String(productData.image).trim() : '',
@@ -170,7 +189,8 @@ export async function createStoreProduct(productData) {
       : [],
     isActive: productData.isActive !== false,
     isFeatured: Boolean(productData.isFeatured),
-    sortOrder: Number(productData.sortOrder) || 0
+    sortOrder: Number(productData.sortOrder) || 0,
+    variants: cleanVariants(productData.variants),
   }
 
   const res = await authorizedStoreProductFetch('/store/product/create', {
@@ -198,6 +218,7 @@ export async function updateStoreProduct(productId, productData = {}) {
   const payload = {}
   if (productData.title !== undefined) payload.title = String(productData.title).trim()
   if (productData.category !== undefined) payload.category = String(productData.category).trim()
+  if (productData.subcategory !== undefined) payload.subcategory = productData.subcategory ? String(productData.subcategory).trim() : ''
   if (productData.priceUSD !== undefined) {
     const p = Number(productData.priceUSD)
     if (isNaN(p) || p <= 0) throw new Error('priceUSD must be a number greater than 0.')
@@ -219,6 +240,7 @@ export async function updateStoreProduct(productId, productData = {}) {
   if (productData.isActive !== undefined) payload.isActive = Boolean(productData.isActive)
   if (productData.isFeatured !== undefined) payload.isFeatured = Boolean(productData.isFeatured)
   if (productData.sortOrder !== undefined) payload.sortOrder = Number(productData.sortOrder) || 0
+  if (productData.variants !== undefined) payload.variants = cleanVariants(productData.variants)
 
   const res = await authorizedStoreProductFetch(`/store/product/update/${productId}`, {
     method: 'PUT',
@@ -289,6 +311,17 @@ export async function getPublicWebsiteProducts(params = {}) {
 
   const cat = params.category !== undefined && params.category !== null ? params.category : 'all'
   query.append('category', cat)
+  if (params.subcategory && params.subcategory !== 'all') {
+    query.append('subcategory', String(params.subcategory).trim())
+  }
+  if (params.min_price !== '' && params.min_price !== undefined && params.min_price !== null) {
+    query.append('min_price', String(params.min_price))
+  }
+  if (params.max_price !== '' && params.max_price !== undefined && params.max_price !== null) {
+    query.append('max_price', String(params.max_price))
+  }
+  if (params.stock && params.stock !== 'all') query.append('stock', String(params.stock))
+  if (params.verified) query.append('verified', '1')
   query.append('sort', String(params.sort || 'featured'))
 
   const url = `${baseUrl}/store/product/websidelist?${query.toString()}`

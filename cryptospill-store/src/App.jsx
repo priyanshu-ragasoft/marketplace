@@ -7,7 +7,7 @@ import StoreDashboard from './pages/store/StoreDashboard'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import { hasStoreAuth, getStoreProfile, clearStoreAuth } from './services/storeStorage'
-import { exchangeMarketplaceToken } from './services/marketplaceHandoff'
+import { exchangeMarketplaceToken, takeMarketplaceToken } from './services/marketplaceHandoff'
 
 function MainContent() {
   const { currentPath, navigate } = useRouter()
@@ -71,36 +71,23 @@ function MainContent() {
   // Main app opens https://marketplace.cryptospill.io/?token=...
   // Log in only when that token's user exists and the connected wallet matches.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const token = (params.get('token') || params.get('access_token') || '').trim()
-    if (!token) return
+    const token = takeMarketplaceToken()
+    if (!token || localStorage.getItem('access_token')) return
+    if (window.__cryptospillHandoffStarted) return
+    window.__cryptospillHandoffStarted = true
 
-    params.delete('token')
-    params.delete('access_token')
-    const next = params.toString()
-    const cleanUrl = `${window.location.pathname}${next ? `?${next}` : ''}${window.location.hash}`
-    window.history.replaceState({}, '', cleanUrl)
-
-    if (localStorage.getItem('access_token')) return
-
-    let cancelled = false
-    setHandoffMessage('Checking your account and wallet…')
+    setHandoffMessage('Signing you in…')
 
     exchangeMarketplaceToken(token)
       .then((user) => {
-        if (cancelled) return
         setHandoffMessage('')
         handleCustomerLoginSuccess(user)
       })
       .catch((err) => {
-        if (cancelled) return
+        window.__cryptospillHandoffStarted = false
         setHandoffMessage(err?.message || 'Could not sign you in from this link.')
       })
-
-    return () => {
-      cancelled = true
-    }
-    // Run once on landing. handleCustomerLoginSuccess is stable enough for this entry.
+    // Run once on landing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

@@ -15,40 +15,6 @@ import {
 import { uploadBannerImage } from '../../services/storeBannerService'
 import { normalizeImageUrl } from '../../utils/imageUrl'
 
-import appleWatchImg from '../../assets/apple-watch.jpg'
-import appleIpadImg from '../../assets/apple-ipad.jpg'
-import appleIPhone17ProImg from '../../assets/apple-iphone-17-pro.jpg'
-import appleIPhone18ProImg from '../../assets/apple-iphone-18-pro.jpg'
-import appleIPhone18ProMaxImg from '../../assets/apple-iphone-18-pro-max.jpg'
-import appleIPhoneDuoImg from '../../assets/apple-iphone-duo.jpg'
-import appleGiftCardImg from '../../assets/apple-gift-card.jpg'
-import appleCarePlusImg from '../../assets/apple-care-plus.jpg'
-import appleOnePassImg from '../../assets/apple-one-pass.jpg'
-import finalCutProImg from '../../assets/final-cut-pro.jpg'
-
-const PRESET_PRODUCT_IMAGES = [
-  { label: 'iPhone 18 Pro', src: appleIPhone18ProImg },
-  { label: 'iPhone 18 Pro Max', src: appleIPhone18ProMaxImg },
-  { label: 'iPhone 17 Pro', src: appleIPhone17ProImg },
-  { label: 'iPhone Duo Foldable', src: appleIPhoneDuoImg },
-  { label: 'Apple Watch Ultra', src: appleWatchImg },
-  { label: 'iPad Pro OLED M4', src: appleIpadImg },
-  { label: 'Apple Gift Card', src: appleGiftCardImg },
-  { label: 'AppleCare+ 2-Yr', src: appleCarePlusImg },
-  { label: 'Apple One Pass', src: appleOnePassImg },
-  { label: 'Final Cut Pro', src: finalCutProImg },
-]
-
-const BADGE_PRESETS = [
-  'BEST SELLER',
-  'NEW ARRIVAL',
-  'FLAGSHIP',
-  'REVOLUTIONARY',
-  'LIMITED EDITION',
-  'HOT DEAL',
-  'TRENDING'
-]
-
 export default function StoreProductsPage({ onShowToast }) {
   const { navigate } = useRouter()
 
@@ -66,6 +32,7 @@ export default function StoreProductsPage({ onShowToast }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all') // category _id or 'all'
+  const [selectedSubcategory, setSelectedSubcategory] = useState('all')
   const [stockFilter, setStockFilter] = useState('all') // 'all' | 'inStock' | 'outOfStock'
   const [sortBy, setSortBy] = useState('newest') // 'newest' | 'price-asc' | 'price-desc' | 'rating'
   const [viewMode, setViewMode] = useState('table') // 'table' | 'grid'
@@ -90,6 +57,10 @@ export default function StoreProductsPage({ onShowToast }) {
   // Form Fields
   const [formTitle, setFormTitle] = useState('')
   const [formCategoryId, setFormCategoryId] = useState('') // category _id
+  const [formSubcategoryId, setFormSubcategoryId] = useState('')
+  const [subDraft, setSubDraft] = useState('')
+  const [subParentId, setSubParentId] = useState('')
+  const [isSubSubmitting, setIsSubSubmitting] = useState(false)
   const [formPriceUSD, setFormPriceUSD] = useState('')
   const [formImage, setFormImage] = useState('')
   const [formMerchant, setFormMerchant] = useState('Apple Authorized Escrow Store')
@@ -99,6 +70,7 @@ export default function StoreProductsPage({ onShowToast }) {
   const [formInStock, setFormInStock] = useState(true)
   const [formDescription, setFormDescription] = useState('')
   const [formSpecsText, setFormSpecsText] = useState('')
+  const [formVariants, setFormVariants] = useState([])
 
   // Toast notification helper
   const notify = (msg) => {
@@ -155,6 +127,7 @@ export default function StoreProductsPage({ onShowToast }) {
       const res = await getStoreProductList({
         search_key: debouncedSearch,
         category: selectedCategory === 'all' ? '' : selectedCategory,
+        subcategory: selectedCategory === 'all' || selectedSubcategory === 'all' ? '' : selectedSubcategory,
         stock: stockFilter,
         sort: sortBy,
         page: 1,
@@ -178,7 +151,7 @@ export default function StoreProductsPage({ onShowToast }) {
     } finally {
       setIsLoading(false)
     }
-  }, [debouncedSearch, selectedCategory, stockFilter, sortBy])
+  }, [debouncedSearch, selectedCategory, selectedSubcategory, stockFilter, sortBy])
 
   // Load categories and products on mount and whenever filters change
   useEffect(() => {
@@ -195,19 +168,17 @@ export default function StoreProductsPage({ onShowToast }) {
     setEditingProductId(null)
     setFormTitle('')
     setFormCategoryId(categories[0]?._id || '')
-    setFormPriceUSD('1299.00')
-    setFormImage(appleIPhone18ProImg)
-    setFormMerchant('Apple Authorized Escrow Store')
-    setFormBadge('NEW ARRIVAL')
+    setFormSubcategoryId('')
+    setFormPriceUSD('')
+    setFormImage('')
+    setFormMerchant('')
+    setFormBadge('')
     setFormRating('5.0')
-    setFormReviews('180')
+    setFormReviews('0')
     setFormInStock(true)
-    setFormDescription(
-      'Next-generation Apple flagship hardware with zero-bezel aerospace titanium enclosure, pro camera array, and A20 silicon.'
-    )
-    setFormSpecsText(
-      'Aerospace Titanium Enclosure\nA20 Neural Fusion Silicon\nSuper Retina XDR OLED\nNext-Gen Apple Intelligence'
-    )
+    setFormDescription('')
+    setFormSpecsText('')
+    setFormVariants([])
     setFormError('')
     setShowInlineCategoryInput(false)
     setInlineCategoryName('')
@@ -222,6 +193,7 @@ export default function StoreProductsPage({ onShowToast }) {
     setFormTitle(product.title || '')
     // In edit modal, set the category select to category_id, not the slug
     setFormCategoryId(product.category_id || product.categoryInfo?._id || product.category || categories[0]?._id || '')
+    setFormSubcategoryId(product.subcategory_id || product.subcategoryInfo?._id || '')
     setFormPriceUSD(product.priceUSD != null ? String(product.priceUSD) : '')
     setFormImage(normalizeImageUrl(product.image || ''))
     setFormMerchant(product.merchant || 'Apple Authorized Escrow Store')
@@ -231,6 +203,19 @@ export default function StoreProductsPage({ onShowToast }) {
     setFormInStock(product.inStock !== false)
     setFormDescription(product.description || '')
     setFormSpecsText(Array.isArray(product.specs) ? product.specs.join('\n') : '')
+    setFormVariants(
+      Array.isArray(product.variants)
+        ? product.variants.map((item) => ({
+            model: item.model || '',
+            storage: item.storage || '',
+            color: item.color || '',
+            colorHex: item.colorHex || '#1d1d1f',
+            price: item.price ? String(item.price) : '',
+            image: item.image || '',
+            inStock: item.inStock !== false,
+          }))
+        : []
+    )
     setFormError('')
     setShowInlineCategoryInput(false)
     setInlineCategoryName('')
@@ -265,6 +250,28 @@ export default function StoreProductsPage({ onShowToast }) {
   }
 
   // Image Upload using existing banner upload API
+  const uploadVariantImage = async (index, file) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setFormError('Please select a valid image file (PNG, JPG, WebP, etc.).')
+      return
+    }
+    setIsUploadingImage(true)
+    setFormError('')
+    try {
+      const res = await uploadBannerImage(file)
+      const uploadedUrl = typeof res === 'string'
+        ? res
+        : (res?.fileUrl || res?.url || res?.path || res?.image || res?.data?.fileUrl || res?.data?.url || res?.data?.path || res?.data?.image)
+      if (!uploadedUrl) throw new Error('Image upload did not return a URL.')
+      setFormVariants((rows) => rows.map((item, i) => i === index ? { ...item, image: normalizeImageUrl(uploadedUrl) } : item))
+    } catch (err) {
+      setFormError(err.message || 'Could not upload the color image.')
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
   const handleImageFileUpload = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -279,16 +286,10 @@ export default function StoreProductsPage({ onShowToast }) {
 
     try {
       const res = await uploadBannerImage(file)
-      if (res && (res.fileUrl || res.url || res.path || res.image || res.data)) {
-        const uploadedUrl =
-          res.fileUrl ||
-          res.url ||
-          res.path ||
-          res.image ||
-          res.data?.fileUrl ||
-          res.data?.url ||
-          res.data?.path ||
-          res.data?.image
+      const uploadedUrl = typeof res === 'string'
+        ? res
+        : (res?.fileUrl || res?.url || res?.path || res?.image || res?.data?.fileUrl || res?.data?.url || res?.data?.path || res?.data?.image)
+      if (uploadedUrl) {
         setFormImage(normalizeImageUrl(uploadedUrl))
         notify('Image uploaded and synced successfully!')
       } else {
@@ -325,6 +326,13 @@ export default function StoreProductsPage({ onShowToast }) {
       return
     }
 
+    const selectedParent = categories.find((c) => c._id === formCategoryId)
+    const parentSubs = Array.isArray(selectedParent?.subcategories) ? selectedParent.subcategories : []
+    if (parentSubs.length > 0 && !formSubcategoryId) {
+      setFormError('Select a subcategory for this category.')
+      return
+    }
+
     const priceNum = parseFloat(formPriceUSD)
     if (isNaN(priceNum) || priceNum <= 0) {
       setFormError('priceUSD must be a number greater than 0.')
@@ -343,9 +351,10 @@ export default function StoreProductsPage({ onShowToast }) {
       const payload = {
         title: formTitle.trim(),
         category: formCategoryId, // category _id
+        subcategory: formSubcategoryId || '',
         priceUSD: priceNum,
         priceCrypto: '',
-        image: normalizeImageUrl(formImage) || appleIPhone18ProImg,
+        image: normalizeImageUrl(formImage) || '',
         merchant: formMerchant.trim() || 'Apple Authorized Escrow Store',
         badge: formBadge.trim().toUpperCase(),
         rating: parseFloat(formRating) || 5.0,
@@ -353,6 +362,17 @@ export default function StoreProductsPage({ onShowToast }) {
         inStock: formInStock,
         description: formDescription.trim(),
         specs: specsArray,
+        variants: formVariants
+          .map((item) => ({
+            model: item.model.trim(),
+            storage: item.storage.trim(),
+            color: item.color.trim(),
+            colorHex: item.colorHex || '',
+            price: item.price ? parseFloat(item.price) : 0,
+            image: (item.image || '').trim(),
+            inStock: item.inStock !== false,
+          }))
+          .filter((item) => item.model || item.storage || item.color || item.image),
         isActive: true,
         isFeatured: false,
         sortOrder: 0
@@ -449,6 +469,22 @@ export default function StoreProductsPage({ onShowToast }) {
       notify(err.message || 'Failed to create category')
     } finally {
       setIsCategorySubmitting(false)
+    }
+  }
+
+  const handleCreateSubcategory = async (parentId) => {
+    if (!subDraft.trim() || subParentId !== parentId) return
+    setIsSubSubmitting(true)
+    try {
+      const res = await createStoreCategory({ name: subDraft.trim(), parent_id: parentId })
+      notify(res.message || `Subcategory "${subDraft.trim()}" created!`)
+      setSubDraft('')
+      setSubParentId('')
+      fetchCategories()
+    } catch (err) {
+      notify(err.message || 'Failed to create subcategory')
+    } finally {
+      setIsSubSubmitting(false)
     }
   }
 
@@ -587,7 +623,10 @@ export default function StoreProductsPage({ onShowToast }) {
           {/* Category Dropdown (options come from GET /store/category/list, value is _id, label is name) */}
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value)
+              setSelectedSubcategory('all')
+            }}
             className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-yellow-400 cursor-pointer"
           >
             <option value="all">All Categories</option>
@@ -597,6 +636,21 @@ export default function StoreProductsPage({ onShowToast }) {
               </option>
             ))}
           </select>
+
+          {selectedCategory !== 'all' && (categories.find((c) => c._id === selectedCategory)?.subcategories || []).length > 0 && (
+            <select
+              value={selectedSubcategory}
+              onChange={(e) => setSelectedSubcategory(e.target.value)}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-yellow-400 cursor-pointer"
+            >
+              <option value="all">All subcategories</option>
+              {(categories.find((c) => c._id === selectedCategory)?.subcategories || []).map((sub) => (
+                <option key={sub._id} value={sub._id}>
+                  {sub.name}
+                </option>
+              ))}
+            </select>
+          )}
 
           {/* Stock Filter (all, inStock, outOfStock) */}
           <select
@@ -701,6 +755,8 @@ export default function StoreProductsPage({ onShowToast }) {
                 {products.map((prod) => {
                   const pId = prod._id || prod.id
                   const categoryName = prod.categoryInfo?.name || categories.find((c) => c._id === prod.category_id || c._id === prod.category)?.name || prod.category || 'General'
+                  const subcategoryName = prod.subcategoryInfo?.name || ''
+                  const categoryLabel = subcategoryName ? `${categoryName} / ${subcategoryName}` : categoryName
                   return (
                     <tr key={pId} className="hover:bg-slate-50/60 transition group">
                       {/* Item */}
@@ -730,7 +786,7 @@ export default function StoreProductsPage({ onShowToast }) {
                       {/* Category */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold capitalize">
-                          {categoryName}
+                          {categoryLabel}
                         </span>
                       </td>
 
@@ -963,14 +1019,18 @@ export default function StoreProductsPage({ onShowToast }) {
                       {/* Card Preview */}
                       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-md flex flex-col justify-between max-w-[280px] mx-auto select-none">
                         <div className="relative h-44 w-full bg-slate-50 flex items-center justify-center p-3">
-                          <img
-                            src={formImage || appleIPhone18ProImg}
-                            alt="Preview"
-                            className="w-full h-full object-contain"
-                            onError={(e) => {
-                              e.target.style.opacity = '0.5'
-                            }}
-                          />
+                          {formImage ? (
+                            <img
+                              src={formImage}
+                              alt="Preview"
+                              className="w-full h-full object-contain"
+                              onError={(e) => {
+                                e.target.style.opacity = '0.5'
+                              }}
+                            />
+                          ) : (
+                            <span className="text-[11px] font-bold text-slate-400">Upload your image</span>
+                          )}
                           {formBadge && (
                             <div className="absolute top-2.5 left-2.5">
                               <span
@@ -986,7 +1046,7 @@ export default function StoreProductsPage({ onShowToast }) {
                         <div className="p-4 flex-1 flex flex-col justify-between">
                           <div>
                             <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1.5">
-                              <span className="truncate max-w-[180px]">{formMerchant || 'Apple Merchant'}</span>
+                              <span className="truncate max-w-[180px]">{formMerchant || 'Your store'}</span>
                               <svg className="w-3.5 h-3.5 shrink-0 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path
                                   fillRule="evenodd"
@@ -997,7 +1057,7 @@ export default function StoreProductsPage({ onShowToast }) {
                             </div>
 
                             <h4 className="text-sm font-bold text-slate-950 line-clamp-2 leading-snug mb-2">
-                              {formTitle || 'iPhone 18 Pro Deep Titanium Blue (512GB)'}
+                              {formTitle || 'Product name'}
                             </h4>
 
                             <div className="flex items-center gap-1.5 mb-3">
@@ -1010,7 +1070,7 @@ export default function StoreProductsPage({ onShowToast }) {
                           <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                             <div>
                               <p className="text-base font-black text-slate-950 leading-none">
-                                ${formPriceUSD ? parseFloat(formPriceUSD).toFixed(2) : '1,299.00'}
+                                ${formPriceUSD ? parseFloat(formPriceUSD).toFixed(2) : '0.00'}
                               </p>
                             </div>
                             <span className="px-3 py-1.5 rounded-lg bg-yellow-400 text-slate-950 font-bold text-[10px] uppercase shadow-2xs">
@@ -1020,30 +1080,6 @@ export default function StoreProductsPage({ onShowToast }) {
                         </div>
                       </div>
 
-                      {/* Presets */}
-                      <div className="mt-4 pt-3 border-t border-slate-200">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
-                          Quick Device Images:
-                        </span>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {PRESET_PRODUCT_IMAGES.slice(0, 4).map((preset, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => {
-                                setFormImage(preset.src)
-                                if (modalMode === 'create' && !formTitle) {
-                                  setFormTitle(preset.label)
-                                }
-                              }}
-                              className="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-700 bg-white border border-slate-200 hover:bg-yellow-50 hover:border-yellow-400 transition cursor-pointer text-left flex items-center gap-1.5"
-                            >
-                              <img src={preset.src} alt="" className="w-3.5 h-3.5 object-contain" />
-                              <span className="truncate">{preset.label}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
                     </div>
                   </div>
 
@@ -1065,7 +1101,7 @@ export default function StoreProductsPage({ onShowToast }) {
                           type="text"
                           value={formTitle}
                           onChange={(e) => setFormTitle(e.target.value)}
-                          placeholder="e.g. iPhone 18 Pro Deep Titanium Blue (512GB)"
+                          placeholder="Product name"
                           required
                           className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-all"
                         />
@@ -1124,7 +1160,10 @@ export default function StoreProductsPage({ onShowToast }) {
                           ) : (
                             <select
                               value={formCategoryId}
-                              onChange={(e) => setFormCategoryId(e.target.value)}
+                              onChange={(e) => {
+                                setFormCategoryId(e.target.value)
+                                setFormSubcategoryId('')
+                              }}
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-yellow-400 cursor-pointer shadow-2xs"
                             >
                               {categories.map((c) => (
@@ -1133,6 +1172,26 @@ export default function StoreProductsPage({ onShowToast }) {
                                 </option>
                               ))}
                             </select>
+                          )}
+                          {(categories.find((c) => c._id === formCategoryId)?.subcategories || []).length > 0 && (
+                            <div className="mt-2">
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                                Brand
+                              </label>
+                              <select
+                                value={formSubcategoryId}
+                                onChange={(e) => setFormSubcategoryId(e.target.value)}
+                                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-yellow-400 cursor-pointer shadow-2xs"
+                              >
+                                <option value="">Select brand</option>
+                                {(categories.find((c) => c._id === formCategoryId)?.subcategories || []).flatMap((sub) => [
+                                  <option key={sub._id} value={sub._id}>{sub.name}</option>,
+                                  ...(sub.subcategories || []).map((line) => (
+                                    <option key={line._id} value={line._id}>{sub.name} / {line.name}</option>
+                                  )),
+                                ])}
+                              </select>
+                            </div>
                           )}
                         </div>
 
@@ -1144,7 +1203,7 @@ export default function StoreProductsPage({ onShowToast }) {
                             type="text"
                             value={formMerchant}
                             onChange={(e) => setFormMerchant(e.target.value)}
-                            placeholder="Apple Authorized Escrow Store"
+                            placeholder="Store name"
                             className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-yellow-400"
                           />
                         </div>
@@ -1167,7 +1226,7 @@ export default function StoreProductsPage({ onShowToast }) {
                           step="0.01"
                           value={formPriceUSD}
                           onChange={(e) => setFormPriceUSD(e.target.value)}
-                          placeholder="1299.00"
+                          placeholder="0.00"
                           required
                           className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-black text-slate-900 focus:outline-none focus:border-yellow-400"
                         />
@@ -1281,25 +1340,6 @@ export default function StoreProductsPage({ onShowToast }) {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                          Badge Presets:
-                        </span>
-                        {BADGE_PRESETS.map((b) => (
-                          <button
-                            key={b}
-                            type="button"
-                            onClick={() => setFormBadge(b)}
-                            className={`px-2 py-0.5 rounded text-[10px] font-black transition cursor-pointer ${
-                              formBadge.toUpperCase() === b
-                                ? 'bg-yellow-400 text-black shadow-2xs'
-                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-                            }`}
-                          >
-                            {b}
-                          </button>
-                        ))}
-                      </div>
                     </div>
 
                     {/* SECTION 4: DESCRIPTION & SPECS */}
@@ -1317,7 +1357,7 @@ export default function StoreProductsPage({ onShowToast }) {
                           rows={2}
                           value={formDescription}
                           onChange={(e) => setFormDescription(e.target.value)}
-                          placeholder="Comprehensive details regarding the hardware device or digital asset..."
+                          placeholder="Describe this item"
                           className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-yellow-400"
                         />
                       </div>
@@ -1330,10 +1370,49 @@ export default function StoreProductsPage({ onShowToast }) {
                           rows={3}
                           value={formSpecsText}
                           onChange={(e) => setFormSpecsText(e.target.value)}
-                          placeholder="49mm Aerospace Titanium Case&#10;Dual-Frequency High-Precision GPS&#10;Up to 72 Hours Battery Life"
+                          placeholder="One detail per line"
                           className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 font-mono focus:outline-none focus:border-yellow-400"
                         />
                       </div>
+                    </div>
+
+                    <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-200/70 space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-lg bg-yellow-400 text-slate-950 flex items-center justify-center text-[10px] font-black">5</span>
+                          <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Options for any item</h4>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setFormVariants((rows) => [...rows, { model: '', storage: '', color: '', colorHex: '#1d1d1f', price: '', image: '', inStock: true }])}
+                          className="px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider cursor-pointer"
+                        >
+                          Add variant
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-slate-500">Works for any product. Fill only what you need: a size, a pack, a color, or all three. Each row can have its own price and photo.</p>
+                      {formVariants.length === 0 && (
+                        <p className="text-[11px] text-slate-400">No variants yet. The product sells as a single item.</p>
+                      )}
+                      {formVariants.map((row, index) => (
+                        <div key={index} className="grid grid-cols-2 sm:grid-cols-6 gap-2 bg-white border border-slate-200 rounded-xl p-2.5">
+                          <input value={row.model} onChange={(e) => setFormVariants((rows) => rows.map((item, i) => i === index ? { ...item, model: e.target.value } : item))} placeholder="Option (size, pack, edition)" className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs" />
+                          <input value={row.storage} onChange={(e) => setFormVariants((rows) => rows.map((item, i) => i === index ? { ...item, storage: e.target.value } : item))} placeholder="Detail (optional)" className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs" />
+                          <input value={row.color} onChange={(e) => setFormVariants((rows) => rows.map((item, i) => i === index ? { ...item, color: e.target.value } : item))} placeholder="Color, if any" className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs" />
+                          <input type="color" value={row.colorHex || '#1d1d1f'} onChange={(e) => setFormVariants((rows) => rows.map((item, i) => i === index ? { ...item, colorHex: e.target.value } : item))} className="h-8 w-full border border-slate-200 rounded-lg bg-white" />
+                          <input value={row.price} onChange={(e) => setFormVariants((rows) => rows.map((item, i) => i === index ? { ...item, price: e.target.value } : item))} placeholder="Price $" className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs" />
+                          <button type="button" onClick={() => setFormVariants((rows) => rows.filter((_, i) => i !== index))} className="px-2 py-1.5 rounded-lg bg-rose-50 text-rose-700 text-[11px] font-bold cursor-pointer">Remove</button>
+                          <label className="col-span-2 sm:col-span-4 flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                            {row.image ? <img src={row.image} alt="" className="h-10 w-10 rounded-lg border border-slate-200 object-contain bg-slate-50" /> : <span className="h-10 w-10 rounded-lg border border-dashed border-slate-300 bg-slate-50" />}
+                            <span className="cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-2 py-1">Color photo</span>
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => { uploadVariantImage(index, e.target.files?.[0]); e.target.value = '' }} />
+                          </label>
+                          <label className="col-span-2 sm:col-span-2 flex items-center gap-2 text-[11px] font-bold text-slate-600">
+                            <input type="checkbox" checked={row.inStock !== false} onChange={(e) => setFormVariants((rows) => rows.map((item, i) => i === index ? { ...item, inStock: e.target.checked } : item))} />
+                            In stock
+                          </label>
+                        </div>
+                      ))}
                     </div>
 
                   </div>
@@ -1431,19 +1510,108 @@ export default function StoreProductsPage({ onShowToast }) {
                   <div className="p-4 text-center text-xs text-slate-400">No categories found.</div>
                 ) : (
                   categories.map((cat) => (
-                    <div key={cat._id} className="p-3 flex items-center justify-between bg-white hover:bg-slate-50 transition">
-                      <div>
-                        <span className="font-bold text-slate-900 text-xs sm:text-sm block">{cat.name}</span>
-                        <span className="text-[10px] text-slate-400 font-mono">slug: {cat.slug}</span>
+                    <div key={cat._id} className="bg-white">
+                      <div className="p-3 flex items-center justify-between hover:bg-slate-50 transition">
+                        <div>
+                          <span className="font-bold text-slate-900 text-xs sm:text-sm block">{cat.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSubParentId(subParentId === cat._id ? '' : cat._id)
+                              setSubDraft('')
+                            }}
+                            className="px-2 py-1 rounded-lg text-amber-700 hover:bg-amber-50 text-[11px] font-bold cursor-pointer"
+                          >
+                            + Subcategory
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCategory(cat)}
+                            className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 text-xs font-bold transition cursor-pointer"
+                            title="Delete category"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteCategory(cat)}
-                        className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 text-xs font-bold transition cursor-pointer"
-                        title="Delete category"
-                      >
-                        Delete
-                      </button>
+                      <div className="px-3 pb-3 space-y-2">
+                        {(cat.subcategories || []).map((sub) => (
+                          <div key={sub._id} className="ml-3 rounded-xl bg-slate-50 px-3 py-2 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-slate-700">{sub.name}</span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSubParentId(subParentId === sub._id ? '' : sub._id)
+                                    setSubDraft('')
+                                  }}
+                                  className="text-[11px] font-bold text-amber-700 cursor-pointer"
+                                >
+                                  + Brand
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCategory(sub)}
+                                  className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                            {(sub.subcategories || []).map((line) => (
+                              <div key={line._id} className="ml-3 flex items-center justify-between text-[11px] text-slate-600">
+                                <span>{line.name}</span>
+                                <button type="button" onClick={() => handleDeleteCategory(line)} className="font-bold text-rose-600 cursor-pointer">Delete</button>
+                              </div>
+                            ))}
+                            {subParentId === sub._id && (
+                              <form
+                                onSubmit={(e) => {
+                                  e.preventDefault()
+                                  handleCreateSubcategory(sub._id)
+                                }}
+                                className="ml-3 flex items-center gap-2"
+                              >
+                                <input
+                                  type="text"
+                                  value={subDraft}
+                                  onChange={(e) => setSubDraft(e.target.value)}
+                                  placeholder="Brand name"
+                                  className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs"
+                                />
+                                <button type="submit" disabled={isSubSubmitting || !subDraft.trim()} className="px-3 py-1.5 bg-slate-900 text-white text-[11px] font-bold rounded-lg cursor-pointer disabled:opacity-50">Add</button>
+                              </form>
+                            )}
+                          </div>
+                        ))}
+                        {subParentId === cat._id && (
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault()
+                              handleCreateSubcategory(cat._id)
+                            }}
+                            className="ml-3 flex items-center gap-2"
+                          >
+                            <input
+                              type="text"
+                              value={subDraft}
+                              onChange={(e) => setSubDraft(e.target.value)}
+                              placeholder="Apple, Samsung..."
+                              className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-yellow-400"
+                            />
+                            <button
+                              type="submit"
+                              disabled={isSubSubmitting || !subDraft.trim()}
+                              className="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-[11px] font-bold disabled:opacity-50 cursor-pointer"
+                            >
+                              {isSubSubmitting ? 'Adding...' : 'Add'}
+                            </button>
+                          </form>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}

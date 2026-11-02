@@ -3,6 +3,59 @@ import ProductCard from './ProductCard'
 import { getPublicWebsiteCategories } from '../../services/storeCategoryService'
 import { getPublicWebsiteProducts } from '../../services/storeProductService'
 
+const PRICE_MAX = 25000
+
+function formatUsd(value) {
+  return `$${Number(value).toLocaleString('en-US')}`
+}
+
+function PriceSlider({ min, max, onMin, onMax }) {
+  const left = (min / PRICE_MAX) * 100
+  const width = ((max - min) / PRICE_MAX) * 100
+  const thumb = 'pointer-events-none absolute inset-x-0 top-0 h-7 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-slate-950 [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-[18px] [&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-slate-950'
+  return (
+    <div>
+      <div className="mb-4 flex items-end justify-between">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">From</p>
+          <p className="mt-1 text-lg font-medium tracking-tight text-slate-950">{formatUsd(min)}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">To</p>
+          <p className="mt-1 text-lg font-medium tracking-tight text-slate-950">{formatUsd(max)}</p>
+        </div>
+      </div>
+      <div className="relative h-7">
+        <div className="absolute left-1 right-1 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-slate-200" />
+        <div
+          className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-yellow-400"
+          style={{ left: `calc(${left}% + 2px)`, width: `calc(${width}% - 4px)` }}
+        />
+        <input
+          type="range"
+          min={0}
+          max={PRICE_MAX}
+          step={50}
+          value={min}
+          onChange={(e) => onMin(Math.min(Number(e.target.value), max - 50))}
+          className={thumb}
+          aria-label="Minimum price"
+        />
+        <input
+          type="range"
+          min={0}
+          max={PRICE_MAX}
+          step={50}
+          value={max}
+          onChange={(e) => onMax(Math.max(Number(e.target.value), min + 50))}
+          className={thumb}
+          aria-label="Maximum price"
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function ProductGrid({
   searchQuery = '',
   onAddToCart,
@@ -11,6 +64,7 @@ export default function ProductGrid({
   // 1. Categories State from GET /store/category/websidelist
   const [categories, setCategories] = useState([])
   const [selectedCategorySlug, setSelectedCategorySlug] = useState('all')
+  const [selectedSubcategorySlug, setSelectedSubcategorySlug] = useState('all')
 
   // 2. Products State from GET /store/product/websidelist
   const [products, setProducts] = useState([])
@@ -20,6 +74,10 @@ export default function ProductGrid({
 
   // Sort State: featured (default) | trending | newest | price-asc | price-desc | rating
   const [sortBy, setSortBy] = useState('featured')
+  const [minPrice, setMinPrice] = useState(0)
+  const [maxPrice, setMaxPrice] = useState(PRICE_MAX)
+  const [inStockOnly, setInStockOnly] = useState(false)
+  const [verifiedOnly, setVerifiedOnly] = useState(false)
 
   // Statuses
   const [isLoading, setIsLoading] = useState(true)
@@ -58,7 +116,12 @@ export default function ProductGrid({
         limit,
         search_key: searchQuery,
         category: selectedCategorySlug === 'all' ? 'all' : selectedCategorySlug,
-        sort: sortBy
+        subcategory: selectedCategorySlug === 'all' || selectedSubcategorySlug === 'all' ? '' : selectedSubcategorySlug,
+        sort: sortBy,
+        min_price: minPrice > 0 ? minPrice : '',
+        max_price: maxPrice < PRICE_MAX ? maxPrice : '',
+        stock: inStockOnly ? 'inStock' : 'all',
+        verified: verifiedOnly,
       })
 
       if (res.success && res.data) {
@@ -77,7 +140,7 @@ export default function ProductGrid({
     } finally {
       setIsLoading(false)
     }
-  }, [selectedCategorySlug, sortBy, searchQuery])
+  }, [selectedCategorySlug, selectedSubcategorySlug, sortBy, searchQuery, minPrice, maxPrice, inStockOnly, verifiedOnly])
 
   // Refetch page 1 when category pill, sort, or search changes
   useEffect(() => {
@@ -87,8 +150,16 @@ export default function ProductGrid({
   // Category change handler
   const handleCategoryChange = (slug) => {
     setSelectedCategorySlug(slug)
+    setSelectedSubcategorySlug('all')
     setPage(1)
   }
+
+  const parentCategories = categories.filter((cat) => !cat.parent_id)
+  const activeCategory = parentCategories.find((cat) => cat.slug === selectedCategorySlug)
+  const subcategories = Array.isArray(activeCategory?.subcategories) ? activeCategory.subcategories : []
+  const activeSubcategory = subcategories.find((sub) => sub.slug === selectedSubcategorySlug)
+    || subcategories.flatMap((sub) => sub.subcategories || []).find((line) => line.slug === selectedSubcategorySlug)
+  const catalogTitle = activeSubcategory?.name || activeCategory?.name || 'All verified items'
 
   // Sort change handler
   const handleSortChange = (newSort) => {
@@ -125,7 +196,7 @@ export default function ProductGrid({
         </button>
 
         {/* Categories from GET /store/category/websidelist */}
-        {categories.map((cat) => {
+        {parentCategories.map((cat) => {
           const isActive = selectedCategorySlug === cat.slug
           return (
             <button
@@ -144,16 +215,119 @@ export default function ProductGrid({
         })}
       </div>
 
+      <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-200 lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-10">
+        <aside className="mb-6 lg:mb-0 lg:sticky lg:top-24 self-start">
+          <div className="rounded-2xl border border-slate-200/80 bg-white px-5 py-5">
+            <div className="flex items-baseline justify-between">
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-400">Filter</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setMinPrice(0)
+                  setMaxPrice(PRICE_MAX)
+                  setInStockOnly(false)
+                  setVerifiedOnly(false)
+                  setSelectedSubcategorySlug('all')
+                }}
+                className="text-[11px] tracking-wide text-slate-400 underline underline-offset-4 hover:text-slate-950 cursor-pointer"
+              >
+                Reset
+              </button>
+            </div>
+            <div className="mt-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-950">Price</p>
+              <div className="mt-4">
+                <PriceSlider min={minPrice} max={maxPrice} onMin={setMinPrice} onMax={setMaxPrice} />
+              </div>
+            </div>
+            <div className="mt-6 divide-y divide-slate-100 border-y border-slate-100">
+              <button
+                type="button"
+                onClick={() => setInStockOnly((value) => !value)}
+                className="flex w-full items-center justify-between py-3 text-sm cursor-pointer"
+              >
+                <span className={inStockOnly ? 'text-slate-950' : 'text-slate-600'}>In stock</span>
+                <span className={`h-4 w-4 rounded-full border ${inStockOnly ? 'border-yellow-400 bg-yellow-400' : 'border-slate-300'}`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setVerifiedOnly((value) => !value)}
+                className="flex w-full items-center justify-between py-3 text-sm cursor-pointer"
+              >
+                <span className={verifiedOnly ? 'text-slate-950' : 'text-slate-600'}>Verified</span>
+                <span className={`h-4 w-4 rounded-full border ${verifiedOnly ? 'border-slate-950 bg-slate-950' : 'border-slate-300'}`} />
+              </button>
+            </div>
+      {subcategories.length > 0 && (
+            <div className="mt-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-950">
+                {activeCategory?.name}
+              </p>
+              <div className="mt-3 flex lg:flex-col overflow-x-auto lg:overflow-visible no-scrollbar">
+              <button
+                type="button"
+                onClick={() => setSelectedSubcategorySlug('all')}
+                className={`border-l-2 px-3 py-2.5 text-left text-sm whitespace-nowrap cursor-pointer shrink-0 ${
+                  selectedSubcategorySlug === 'all'
+                    ? 'border-yellow-400 text-slate-950 font-medium'
+                    : 'border-transparent text-slate-500 hover:text-slate-950'
+                }`}
+              >
+                All
+              </button>
+              {subcategories.map((sub) => {
+                const lines = Array.isArray(sub.subcategories) ? sub.subcategories : []
+                const lineActive = lines.some((line) => line.slug === selectedSubcategorySlug)
+                const isActive = selectedSubcategorySlug === sub.slug || lineActive
+                const label = sub.name || 'Brand'
+                return (
+                  <div key={sub._id || sub.slug} className="shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSubcategorySlug(sub.slug)}
+                      className={`w-full border-l-2 px-3 py-2.5 text-left text-[15px] tracking-tight whitespace-nowrap cursor-pointer ${
+                        isActive ? 'border-yellow-400 text-slate-950' : 'border-transparent text-slate-500 hover:text-slate-950'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                    {isActive && lines.length > 0 && (
+                      <div className="mb-1">
+                        {lines.map((line) => (
+                          <button
+                            key={line._id || line.slug}
+                            type="button"
+                            onClick={() => setSelectedSubcategorySlug(line.slug)}
+                            className={`block w-full pl-6 pr-3 py-1.5 text-left text-xs cursor-pointer ${
+                              selectedSubcategorySlug === line.slug ? 'text-slate-950 font-medium' : 'text-slate-400 hover:text-slate-800'
+                            }`}
+                          >
+                            {line.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+              </div>
+            </div>
+      )}
+          </div>
+        </aside>
+
+      <div>
       {/* ==================================================== */}
       {/* 2. PAGE HEADING, SUBTITLE & SORT CONTROL */}
       {/* ==================================================== */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mt-4 sm:mt-6 mb-6 sm:mb-8 pt-4 sm:pt-6 border-t border-slate-200">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div>
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
-            All Verified Marketplace Items
+            {catalogTitle}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Showing {totalCount} {totalCount === 1 ? 'item' : 'items'} ready for instant decentralized checkout
+            {totalCount} {totalCount === 1 ? 'item' : 'items'}
+            {activeCategory ? ` in ${activeSubcategory ? `${activeCategory.name} / ${activeSubcategory.name}` : activeCategory.name}` : ''}
           </p>
         </div>
 
@@ -299,6 +473,8 @@ export default function ProductGrid({
           )}
         </>
       )}
+      </div>
+      </div>
 
     </div>
   )

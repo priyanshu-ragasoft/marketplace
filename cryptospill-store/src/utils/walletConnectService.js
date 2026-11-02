@@ -179,16 +179,11 @@ async function getEthereumProviderClass() {
   }
 
   try {
-    const mod = await import('https://esm.sh/@walletconnect/ethereum-provider@2.18.0?bundle')
+    const mod = await import('@walletconnect/ethereum-provider')
     return mod.EthereumProvider || mod.default?.EthereumProvider || mod.default
-  } catch (err1) {
-    try {
-      const mod = await import('https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.18.0/+esm')
-      return mod.EthereumProvider || mod.default?.EthereumProvider || mod.default
-    } catch (err2) {
-      console.warn('Could not load WalletConnect via ESM CDN:', err1, err2)
-      return null
-    }
+  } catch (err) {
+    console.warn('Could not load WalletConnect:', err)
+    return null
   }
 }
 

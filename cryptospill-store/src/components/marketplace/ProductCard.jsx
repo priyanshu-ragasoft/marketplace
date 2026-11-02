@@ -91,9 +91,27 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
           </div>
 
           {/* Product Title in bold, two lines max */}
-          <h3 className="text-sm sm:text-base font-bold text-slate-950 group-hover:text-yellow-600 transition-colors line-clamp-2 leading-snug mb-2">
+          <h3 className="text-sm sm:text-base font-bold text-slate-950 group-hover:text-yellow-600 transition-colors line-clamp-2 leading-snug mb-1">
             {product.title}
           </h3>
+          {(product.categoryInfo?.name || product.subcategoryInfo?.name) && (
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-2">
+              {[product.categoryInfo?.name, product.subcategoryInfo?.name].filter(Boolean).join(' · ')}
+            </p>
+          )}
+          {Array.isArray(product.variants) && product.variants.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-2">
+              {product.variants.slice(0, 5).map((item, index) => (
+                <span
+                  key={`${item.color}-${index}`}
+                  title={[item.model, item.storage, item.color].filter(Boolean).join(' · ')}
+                  className="w-3.5 h-3.5 rounded-full border border-slate-200"
+                  style={{ backgroundColor: item.colorHex || '#94a3b8' }}
+                />
+              ))}
+              <span className="text-[10px] font-bold text-slate-400">{product.variants.length} options</span>
+            </div>
+          )}
 
           {/* Yellow stars from rating, then number, then reviews in parentheses */}
           <div className="flex items-center gap-1.5 mb-4">

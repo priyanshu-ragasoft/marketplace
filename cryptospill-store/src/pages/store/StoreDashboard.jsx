@@ -22,6 +22,12 @@ import {
   getStoreAccessToken,
   getStoreRefreshToken
 } from '../../services/storeStorage'
+import { getStoreProductList } from '../../services/storeProductService'
+import { getStoreCategoryList } from '../../services/storeCategoryService'
+import { listStoreBanners } from '../../services/storeBannerService'
+import { listStoreAnnouncements } from '../../services/storeAnnouncementService'
+import { listStoreBlogs } from '../../services/storeBlogService'
+import { listStoreDeliveries } from '../../services/storeDeliveryService'
 
 export default function StoreDashboard({ onLogout }) {
   const { currentPath, navigate } = useRouter()
@@ -44,6 +50,42 @@ export default function StoreDashboard({ onLogout }) {
     }
     return 'dashboard'
   })
+  const [overview, setOverview] = useState(null)
+  const [overviewError, setOverviewError] = useState('')
+
+  useEffect(() => {
+    if (activeTab !== 'dashboard') return
+    let cancelled = false
+    setOverviewError('')
+    Promise.allSettled([
+      getStoreProductList({ page: 1, limit: 1 }),
+      getStoreCategoryList({ page: 1, limit: 1 }),
+      listStoreBanners({ page: 1, limit: 1 }),
+      listStoreAnnouncements({ page: 1, limit: 1 }),
+      listStoreBlogs({ page: 1, limit: 1 }),
+      listStoreDeliveries(),
+    ]).then(([products, categories, banners, announcements, blogs, orders]) => {
+      if (cancelled) return
+      const productData = products.status === 'fulfilled' ? products.value?.data : null
+      const orderRows = orders.status === 'fulfilled' && Array.isArray(orders.value) ? orders.value : []
+      if ([products, categories, banners, announcements, blogs, orders].every((item) => item.status === 'rejected')) {
+        setOverviewError('Store totals could not be loaded.')
+      }
+      setOverview({
+        products: productData?.stats?.total ?? productData?.totalCount ?? 0,
+        inStock: productData?.stats?.inStockCount ?? 0,
+        outOfStock: productData?.stats?.outOfStockCount ?? 0,
+        categories: categories.status === 'fulfilled' ? (categories.value?.data?.totalCount ?? 0) : 0,
+        banners: banners.status === 'fulfilled' ? (banners.value?.totalCount ?? 0) : 0,
+        announcements: announcements.status === 'fulfilled' ? (announcements.value?.totalCount ?? 0) : 0,
+        blogs: blogs.status === 'fulfilled' ? (blogs.value?.totalCount ?? 0) : 0,
+        orders: orderRows.length,
+      })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [activeTab])
 
   // Sync tab with URL
   useEffect(() => {
@@ -326,8 +368,8 @@ export default function StoreDashboard({ onLogout }) {
               <span className="font-sans text-sm font-extrabold leading-tight text-white">
                 Crypto<span style={{ color: '#D1A61B' }}>Spill</span>
               </span>
-              <span className="text-[9px] font-extrabold tracking-widest text-[#D1A61B] uppercase">
-                STORE CONSOLE
+                <span className="text-[9px] font-extrabold tracking-widest text-[#D1A61B] uppercase">
+                Marketplace
               </span>
             </div>
           </div>
@@ -375,7 +417,7 @@ export default function StoreDashboard({ onLogout }) {
                   Crypto<span style={{ color: '#D1A61B' }}>Spill</span>
                 </span>
                 <span className="text-[10px] font-extrabold tracking-widest text-[#D1A61B] uppercase mt-0.5">
-                  STORE CONSOLE
+                  Marketplace
                 </span>
               </div>
             </div>
@@ -424,10 +466,8 @@ export default function StoreDashboard({ onLogout }) {
         <div className="pt-4 border-t border-[#222222] flex flex-col gap-3">
           {/* Active Gateway Indicator */}
           <div className="px-3 py-1.5 rounded-xl bg-[#181818] border border-[#262626] flex items-center justify-between text-[10px]">
-            <span className="text-slate-400 font-medium">API Gateway</span>
-            <span className="text-emerald-400 font-mono font-bold truncate max-w-[140px]" title={activeBaseUrl}>
-              {activeBaseUrl.replace('/api/v1', '').replace('http://', '').replace('https://', '')}
-            </span>
+            <span className="text-slate-400 font-medium">Storefront</span>
+            <span className="text-emerald-400 font-bold">Live</span>
           </div>
 
           {/* Dynamic User Card with real backend data */}
@@ -445,7 +485,7 @@ export default function StoreDashboard({ onLogout }) {
 
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-bold text-white truncate" title={userEmail}>{userEmail}</span>
-              <span className="text-[11px] text-[#D1A61B] font-semibold">Store Admin</span>
+              <span className="text-[11px] text-[#D1A61B] font-semibold">{fullName}</span>
             </div>
           </div>
 
@@ -492,7 +532,7 @@ export default function StoreDashboard({ onLogout }) {
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 font-normal mt-1">
                 {activeTab === 'products'
-                  ? 'Manage Apple hardware items, digital cards, stock status, and storefront pricing.'
+                  ? 'Catalog, pricing, stock, and the options buyers see on the product page.'
                   : activeTab === 'banners'
                     ? 'Manage homepage promo cards, pricing offers, and image assets.'
                     : activeTab === 'announcements'
@@ -501,7 +541,7 @@ export default function StoreDashboard({ onLogout }) {
                         ? 'Publish educational guides, escrow reports, and updates directly to the storefront blog.'
                         : activeTab === 'deliveries'
                           ? 'Order numbers, payment, and delivery status from checkout through delivery.'
-                        : 'Overview of store administrator, real-time endpoints, and security sync.'}
+                        : 'CryptoSpill marketplace. Catalog, orders, and what is live on the storefront.'}
               </p>
             </div>
           </div>
@@ -509,6 +549,26 @@ export default function StoreDashboard({ onLogout }) {
           {/* MAIN CARD: MATCHING THE EXACT SCREENSHOT CONTAINER STRUCTURE */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {[
+                  ['Products', overview?.products],
+                  ['In stock', overview?.inStock],
+                  ['Orders', overview?.orders],
+                  ['Categories', overview?.categories],
+                  ['Banners', overview?.banners],
+                  ['Announcements', overview?.announcements],
+                  ['Blogs', overview?.blogs],
+                  ['Out of stock', overview?.outOfStock],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+                    <p className="mt-1 text-2xl font-black text-slate-950">{overview ? value : '…'}</p>
+                  </div>
+                ))}
+              </div>
+              {overviewError && (
+                <p className="text-xs font-semibold text-rose-700">{overviewError}</p>
+              )}
               {/* Quick Products Catalog Card */}
               <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-400/30 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm bg-white">
                 <div className="flex items-start gap-4">
@@ -521,11 +581,11 @@ export default function StoreDashboard({ onLogout }) {
                     <div className="flex items-center gap-2">
                       <h3 className="text-base font-black text-slate-900">Marketplace Products Catalog</h3>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-extrabold uppercase">
-                        Storefront Live
+                        {overview ? `${overview.products} products` : 'Loading'}
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-1 max-w-xl">
-                      Add, edit, and organize verified Apple hardware, prices in USD/ETH, stock quantities, and floating badges.
+                      {overview ? `${overview.inStock} in stock, ${overview.outOfStock} out of stock, ${overview.categories} categories.` : 'Loading catalog totals.'}
                     </p>
                   </div>
                 </div>
@@ -542,6 +602,14 @@ export default function StoreDashboard({ onLogout }) {
                 </button>
               </div>
 
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Orders</h3>
+                  <p className="text-xs text-slate-500 mt-1">{overview ? `${overview.orders} orders on this store.` : 'Loading orders.'}</p>
+                </div>
+                <button type="button" onClick={() => handleTabChange('deliveries')} className="px-5 py-2.5 rounded-xl bg-slate-950 text-white font-bold text-xs uppercase tracking-wider cursor-pointer">Open orders</button>
+              </div>
+
               {/* Quick Hero Banners Carousel Card */}
               <div className="bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-transparent border border-yellow-400/40 rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm bg-white">
                 <div className="flex items-start gap-4">
@@ -554,11 +622,11 @@ export default function StoreDashboard({ onLogout }) {
                     <div className="flex items-center gap-2">
                       <h3 className="text-base font-black text-slate-900">Homepage Banners</h3>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-extrabold uppercase">
-                        Live On Storefront
+                        {overview ? `${overview.banners} banners` : 'Loading'}
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-1 max-w-xl">
-                      Manage promo cards (title, offerText, subtitle, rewardText, badgeText, image, and colors) featured on the homepage carousel.
+                      Homepage promotions buyers see first: offer, image, and colors.
                     </p>
                   </div>
                 </div>
@@ -587,7 +655,7 @@ export default function StoreDashboard({ onLogout }) {
                     <div className="flex items-center gap-2">
                       <h3 className="text-base font-black text-slate-900">Storefront Announcement Marquee</h3>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-extrabold uppercase">
-                        Live On Store
+                        {overview ? `${overview.announcements} live` : 'Loading'}
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-1 max-w-xl">
@@ -620,7 +688,7 @@ export default function StoreDashboard({ onLogout }) {
                     <div className="flex items-center gap-2">
                       <h3 className="text-base font-black text-slate-900">Marketplace Blog &amp; Guides</h3>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-extrabold uppercase">
-                        Storefront Live
+                        {overview ? `${overview.blogs} posts` : 'Loading'}
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-1 max-w-xl">

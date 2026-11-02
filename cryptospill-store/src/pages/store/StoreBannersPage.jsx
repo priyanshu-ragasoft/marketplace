@@ -957,7 +957,7 @@ export default function StoreBannersPage({ onShowToast }) {
                             type="text"
                             value={formTitle}
                             onChange={(e) => setFormTitle(e.target.value)}
-                            placeholder="e.g. CryptoSpill Apple Fest"
+                            placeholder="iPhone 18 Pro"
                             required
                             className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-all"
                           />
@@ -966,7 +966,7 @@ export default function StoreBannersPage({ onShowToast }) {
                         {/* Background Color Picker & Swatches */}
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                            Background Gradient Color
+                            Background color
                           </label>
                           <div className="flex flex-wrap items-center gap-2.5">
                             <div className="flex items-center gap-2 px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl shadow-2xs">
@@ -1010,20 +1010,20 @@ export default function StoreBannersPage({ onShowToast }) {
                       <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-200/70 space-y-3">
                         <div className="flex items-center gap-2">
                           <span className="w-5 h-5 rounded-lg bg-yellow-400 text-slate-950 flex items-center justify-center text-[10px] font-black">2</span>
-                          <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Promotional Copy & Badges</h4>
+                          <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">What buyers read</h4>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {/* Offer Text */}
                           <div>
                             <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                              Offer Headline (Large Bold)
+                              Headline
                             </label>
                             <input
                               type="text"
                               value={formOfferText}
                               onChange={(e) => setFormOfferText(e.target.value)}
-                              placeholder="e.g. 30–50% Off"
+                              placeholder="From $1,199"
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 font-bold focus:outline-none focus:border-yellow-400 transition"
                             />
                           </div>
@@ -1031,13 +1031,13 @@ export default function StoreBannersPage({ onShowToast }) {
                           {/* Subtitle */}
                           <div>
                             <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                              Subtitle Description
+                              Supporting line
                             </label>
                             <input
                               type="text"
                               value={formSubtitle}
                               onChange={(e) => setFormSubtitle(e.target.value)}
-                              placeholder="e.g. On iPhone 18 Pro Max & Pro"
+                              placeholder="Factory sealed. Held in escrow until inspection."
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-yellow-400 transition"
                             />
                           </div>
@@ -1045,13 +1045,13 @@ export default function StoreBannersPage({ onShowToast }) {
                           {/* Reward Text */}
                           <div>
                             <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                              Reward Chip (Bottom Left)
+                              Small note
                             </label>
                             <input
                               type="text"
                               value={formRewardText}
                               onChange={(e) => setFormRewardText(e.target.value)}
-                              placeholder="e.g. Upto 8% Crypto Cashback"
+                              placeholder="0% escrow fee"
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-yellow-400 transition"
                             />
                           </div>
@@ -1059,13 +1059,13 @@ export default function StoreBannersPage({ onShowToast }) {
                           {/* Badge Text */}
                           <div>
                             <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                              Badge Pill (Bottom Right)
+                              Corner badge
                             </label>
                             <input
                               type="text"
                               value={formBadgeText}
                               onChange={(e) => setFormBadgeText(e.target.value)}
-                              placeholder="e.g. THE BIG SPILL DAYS"
+                              placeholder="New"
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-yellow-400 transition"
                             />
                           </div>

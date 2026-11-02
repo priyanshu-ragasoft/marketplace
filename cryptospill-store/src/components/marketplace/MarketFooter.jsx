@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import BrandLogo from '../common/BrandLogo'
 import { Link, useRouter } from '../../router/RouterContext'
 
@@ -7,21 +7,18 @@ import trustAuthenticity3D from '../../assets/trust-authenticity-3d.png'
 import trustEscrow3D from '../../assets/trust-escrow-3d.png'
 import trustTicket3D from '../../assets/trust-ticket-3d.png'
 
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.cryptospill&hl=en_IN'
+
+function FaApple({ className = 'w-6 h-6 text-black shrink-0' }) {
+  return (
+    <svg className={className} viewBox="0 0 384 512" fill="currentColor">
+      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.4z" />
+    </svg>
+  )
+}
+
 export default function MarketFooter() {
   const { navigate } = useRouter()
-  const [newsletterEmail, setNewsletterEmail] = useState('')
-  const [isSubscribed, setIsSubscribed] = useState(false)
-
-  const handleSubscribe = (e) => {
-    e.preventDefault()
-    if (newsletterEmail.trim()) {
-      setIsSubscribed(true)
-      setTimeout(() => {
-        setNewsletterEmail('')
-        setIsSubscribed(false)
-      }, 4000)
-    }
-  }
 
   return (
     <footer className="bg-white border-t border-slate-200 text-slate-600 text-xs font-sans selection:bg-yellow-400 selection:text-black">
@@ -134,23 +131,62 @@ export default function MarketFooter() {
         </div>
       </div>
 
-      {/* 2. Newsletter & VIP Drop Updates (Human Touchpoint) */}
-      <div className="border-b border-slate-200/80 bg-slate-50/60 py-6">
+      {/* 2. Mobile App Download & Live Updates */}
+      <div className="bg-black border-y border-neutral-900 py-6 text-white">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-center md:text-left">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900">
-                Subscribe for Exclusive Apple Drops &amp; Flash Discounts
+              <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
+                Experience CryptoSpill on iOS &amp; Android
               </h3>
-              <p className="text-slate-500 text-xs mt-0.5">
-                Get notified when limited iPhone stock drops or zero-escrow promo codes go live.
+              <p className="text-neutral-400 text-xs mt-0.5">
+                Download the official app to track live escrow air cargo, manage orders and get instant drop notifications.
               </p>
             </div>
 
-            <form onSubmit={handleSubscribe} className="flex items-center gap-2 w-full md:w-auto max-w-md">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* App Store button */}
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                aria-label="Download on the App Store"
+                title="App Store - Coming Soon"
+                className="group inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white text-gray-900 hover:bg-neutral-100 transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 shrink-0"
+              >
+                <FaApple className="w-6 h-6 text-black shrink-0 group-hover:scale-105 transition-transform duration-200" />
+                <div className="flex flex-col text-left">
+                  <span className="text-[11px] text-gray-600 font-medium leading-none">
+                    Download on the
+                  </span>
+                  <span className="text-[14px] font-bold text-black tracking-tight leading-none mt-0.5">
+                    App Store
+                  </span>
+                </div>
+              </a>
 
-
-            </form>
+              {/* Google Play button */}
+              <a
+                href={PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Get it on Google Play"
+                className="group inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white text-gray-900 hover:bg-neutral-100 transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 shrink-0"
+              >
+                <img
+                  src="/google-play.png"
+                  alt="Google Play"
+                  className="w-6 h-6 object-contain shrink-0 group-hover:scale-105 transition-transform duration-200"
+                />
+                <div className="flex flex-col text-left">
+                  <span className="text-[11px] text-gray-600 font-medium leading-none">
+                    Get it on
+                  </span>
+                  <span className="text-[14px] font-bold text-black tracking-tight leading-none mt-0.5">
+                    Google Play
+                  </span>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
       </div>

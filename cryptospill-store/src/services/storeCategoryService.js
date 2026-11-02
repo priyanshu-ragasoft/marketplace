@@ -143,6 +143,7 @@ export async function createStoreCategory(categoryData) {
   }
 
   if (categoryData.slug) payload.slug = String(categoryData.slug).trim()
+  if (categoryData.parent_id) payload.parent_id = String(categoryData.parent_id).trim()
   if (categoryData.isActive !== undefined) payload.isActive = Boolean(categoryData.isActive)
   if (categoryData.sortOrder !== undefined) payload.sortOrder = Number(categoryData.sortOrder) || 0
 
@@ -171,6 +172,7 @@ export async function updateStoreCategory(categoryId, categoryData = {}) {
   const payload = {}
   if (categoryData.name !== undefined) payload.name = String(categoryData.name).trim()
   if (categoryData.slug !== undefined) payload.slug = String(categoryData.slug).trim()
+  if (categoryData.parent_id !== undefined) payload.parent_id = categoryData.parent_id ? String(categoryData.parent_id).trim() : null
   if (categoryData.isActive !== undefined) payload.isActive = Boolean(categoryData.isActive)
   if (categoryData.sortOrder !== undefined) payload.sortOrder = Number(categoryData.sortOrder) || 0
 
