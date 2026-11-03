@@ -138,7 +138,9 @@ export default function MarketNavbar({
 
         {/* Brand Logo with Yellow SPILL text */}
         <div className="shrink-0 flex items-center">
-          <BrandLogo size="default" isDarkBackground={false} />
+          <BrandLogo size="default" isDarkBackground={false} withBorder={true} showDivider={true} />
+
+
         </div>
 
         {/* Global Search Bar */}
@@ -175,7 +177,7 @@ export default function MarketNavbar({
 
           {/* REWARDS Pill (Modern sleek counter) */}
           {isLoggedIn && (
-            <div 
+            <div
               className="hidden sm:flex items-center gap-2.5 px-3 h-10 rounded-xl bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300/80 transition-all select-none cursor-default shadow-xs"
               title={`${formattedRewards} Spill Reward Points`}
             >
@@ -228,11 +230,10 @@ export default function MarketNavbar({
               <button
                 type="button"
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className={`h-10 flex items-center gap-2 pl-2 pr-2.5 sm:px-3 rounded-xl transition-all cursor-pointer text-left shrink-0 shadow-xs active:scale-95 group ${
-                  isProfileOpen 
-                    ? 'bg-white border-[#D1A61B] ring-2 ring-[#D1A61B]/20' 
+                className={`h-10 flex items-center gap-2 pl-2 pr-2.5 sm:px-3 rounded-xl transition-all cursor-pointer text-left shrink-0 shadow-xs active:scale-95 group ${isProfileOpen
+                    ? 'bg-white border-[#D1A61B] ring-2 ring-[#D1A61B]/20'
                     : 'bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300/80'
-                }`}
+                  }`}
               >
                 <img
                   src={profileAvatar}
@@ -253,135 +254,135 @@ export default function MarketNavbar({
               {isProfileOpen && (
                 <>
                   {/* Invisible Backdrop to close dropdown on clicking outside */}
-                  <div 
-                    className="fixed inset-0 z-40 bg-transparent cursor-default" 
-                    aria-hidden="true" 
-                    onClick={() => setIsProfileOpen(false)} 
+                  <div
+                    className="fixed inset-0 z-40 bg-transparent cursor-default"
+                    aria-hidden="true"
+                    onClick={() => setIsProfileOpen(false)}
                   />
                   <div className="absolute right-0 mt-2 max-h-[70vh] w-72 overflow-y-auto sm:w-80 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 text-xs animate-fadeIn">
-                  {/* Top Header Card */}
-                  <div className="p-4 bg-gradient-to-b from-slate-50/90 to-white border-b border-slate-100">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <img
-                          src={profileAvatar}
-                          alt=""
-                          className="h-10 w-10 shrink-0 object-contain"
-                        />
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <p className="font-extrabold text-slate-900 text-sm leading-tight">{userDisplayName}</p>
-                           
+                    {/* Top Header Card */}
+                    <div className="p-4 bg-gradient-to-b from-slate-50/90 to-white border-b border-slate-100">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <img
+                            src={profileAvatar}
+                            alt=""
+                            className="h-10 w-10 shrink-0 object-contain"
+                          />
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-extrabold text-slate-900 text-sm leading-tight">{userDisplayName}</p>
+
+                            </div>
+                            <p className="text-slate-400 text-xs font-mono font-medium leading-tight mt-0.5">@{userUsername}</p>
                           </div>
-                          <p className="text-slate-400 text-xs font-mono font-medium leading-tight mt-0.5">@{userUsername}</p>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Connected Wallet Box */}
-                  <div className="p-3 mx-3 my-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      <span>Connected Wallet</span>
-                      <span className="flex items-center gap-1 text-emerald-600 font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Active
-                      </span>
-                    </div>
-
-                    {userWalletAddress ? (
-                      <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-200">
-                        <span className="font-mono text-xs font-bold text-slate-800" title={userWalletAddress}>
-                          {shortWallet}
+                    {/* Connected Wallet Box */}
+                    <div className="p-3 mx-3 my-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+                      <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <span>Connected Wallet</span>
+                        <span className="flex items-center gap-1 text-emerald-600 font-bold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Active
                         </span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            if (userWalletAddress) {
-                              navigator.clipboard?.writeText(userWalletAddress)
-                              alert('Wallet address copied to clipboard!')
-                            }
-                          }}
-                          className="text-slate-400 hover:text-slate-800 transition p-1 cursor-pointer rounded hover:bg-slate-100"
-                          title="Copy full address"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        </button>
                       </div>
-                    ) : (
-                      <div className="bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 font-medium text-[11px]">
-                        Standard account login
-                      </div>
-                    )}
 
-                    {/* Metadata Pills (Invite Code & Rewards) */}
-                    {(currentUser?.Invite_Code || rawRewards) && (
-                      <div className={`grid ${currentUser?.Invite_Code ? 'grid-cols-2' : 'grid-cols-1'} gap-1.5 pt-0.5`}>
-                        {currentUser?.Invite_Code && (
-                          <div className="bg-white px-2 py-1 rounded border border-slate-200/70 text-left">
-                            <span className="block text-[8.5px] uppercase font-bold text-slate-400 leading-tight">Invite Code</span>
-                            <span className="block font-mono text-[10px] font-bold text-slate-700 truncate leading-tight mt-0.5">{currentUser.Invite_Code}</span>
-                          </div>
-                        )}
-                        <div className="bg-white px-2 py-1 rounded border border-slate-200/70 text-left">
-                          <span className="block text-[8.5px] uppercase font-bold text-slate-400 leading-tight">Rewards</span>
-                          <span className="block font-mono text-[10px] font-bold text-[#D1A61B] truncate leading-tight mt-0.5">{formattedRewards} </span>
+                      {userWalletAddress ? (
+                        <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-200">
+                          <span className="font-mono text-xs font-bold text-slate-800" title={userWalletAddress}>
+                            {shortWallet}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (userWalletAddress) {
+                                navigator.clipboard?.writeText(userWalletAddress)
+                                alert('Wallet address copied to clipboard!')
+                              }
+                            }}
+                            className="text-slate-400 hover:text-slate-800 transition p-1 cursor-pointer rounded hover:bg-slate-100"
+                            title="Copy full address"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          </button>
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      ) : (
+                        <div className="bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-400 font-medium text-[11px]">
+                          Standard account login
+                        </div>
+                      )}
 
-                  {/* Navigation Links with Icons */}
-                  <div className="px-2 py-1 space-y-0.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsProfileOpen(false)
-                        navigate('/account/orders')
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition font-medium group text-left cursor-pointer"
-                    >
-                      <svg className="w-4 h-4 text-slate-400 group-hover:text-slate-800 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                      <span>My Orders &amp; Vault</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsProfileOpen(false)
-                        navigate('/account/escrow')
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition font-medium group text-left cursor-pointer"
-                    >
-                      <svg className="w-4 h-4 text-slate-400 group-hover:text-slate-800 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                      <span>Escrow Multi-Sig Status</span>
-                    </button>
-                  
-                  </div>
+                      {/* Metadata Pills (Invite Code & Rewards) */}
+                      {(currentUser?.Invite_Code || rawRewards) && (
+                        <div className={`grid ${currentUser?.Invite_Code ? 'grid-cols-2' : 'grid-cols-1'} gap-1.5 pt-0.5`}>
+                          {currentUser?.Invite_Code && (
+                            <div className="bg-white px-2 py-1 rounded border border-slate-200/70 text-left">
+                              <span className="block text-[8.5px] uppercase font-bold text-slate-400 leading-tight">Invite Code</span>
+                              <span className="block font-mono text-[10px] font-bold text-slate-700 truncate leading-tight mt-0.5">{currentUser.Invite_Code}</span>
+                            </div>
+                          )}
+                          <div className="bg-white px-2 py-1 rounded border border-slate-200/70 text-left">
+                            <span className="block text-[8.5px] uppercase font-bold text-slate-400 leading-tight">Rewards</span>
+                            <span className="block font-mono text-[10px] font-bold text-[#D1A61B] truncate leading-tight mt-0.5">{formattedRewards} </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Log Out Bar */}
-                  <div className="p-2 border-t border-slate-100 bg-slate-50/50">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsProfileOpen(false)
-                        onLogout()
-                      }}
-                      className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl text-slate-900 hover:bg-white font-bold transition cursor-pointer"
-                    >
-                      <img src={logoutMark} alt="" className="h-8 w-8 object-contain" />
-                      <span>Log Out</span>
-                    </button>
+                    {/* Navigation Links with Icons */}
+                    <div className="px-2 py-1 space-y-0.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(false)
+                          navigate('/account/orders')
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition font-medium group text-left cursor-pointer"
+                      >
+                        <svg className="w-4 h-4 text-slate-400 group-hover:text-slate-800 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <span>My Orders &amp; Vault</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(false)
+                          navigate('/account/escrow')
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition font-medium group text-left cursor-pointer"
+                      >
+                        <svg className="w-4 h-4 text-slate-400 group-hover:text-slate-800 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span>Escrow Multi-Sig Status</span>
+                      </button>
+
+                    </div>
+
+                    {/* Log Out Bar */}
+                    <div className="p-2 border-t border-slate-100 bg-slate-50/50">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(false)
+                          onLogout()
+                        }}
+                        className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl text-slate-900 hover:bg-white font-bold transition cursor-pointer"
+                      >
+                        <img src={logoutMark} alt="" className="h-8 w-8 object-contain" />
+                        <span>Log Out</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
             </div>
           )}
 
